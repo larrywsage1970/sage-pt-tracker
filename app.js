@@ -94,16 +94,19 @@ function isIOS() {
 
 // Exercise IDs renamed when the library was rebuilt around a desk + balance
 // board — maps old saved choices forward so they aren't silently dropped.
+// Paired with each old id's original default, so an untouched entry (still
+// sitting at its old default) doesn't override the new curated default —
+// only a genuine user change gets carried forward.
 const ID_MIGRATIONS = {
-  "wall-pu": "desk-pu",
-  "wide-wall-pu": "wide-desk-pu",
-  "close-wall-pu": "close-desk-pu",
-  "chair-dip": "desk-dip",
-  "pike-pu": "desk-pike-pu",
-  "door-row": "desk-row",
-  "band-row": "band-desk-row",
-  "wall-plank": "desk-plank",
-  "chair-squat": "desk-squat",
+  "wall-pu":      { to: "desk-pu",       oldDefault: { reps: 15, active: true } },
+  "wide-wall-pu": { to: "wide-desk-pu",  oldDefault: { reps: 12, active: false } },
+  "close-wall-pu":{ to: "close-desk-pu", oldDefault: { reps: 10, active: false } },
+  "chair-dip":    { to: "desk-dip",      oldDefault: { reps: 10, active: false } },
+  "pike-pu":      { to: "desk-pike-pu",  oldDefault: { reps: 8,  active: false } },
+  "door-row":     { to: "desk-row",      oldDefault: { reps: 12, active: true } },
+  "band-row":     { to: "band-desk-row", oldDefault: { reps: 15, active: false } },
+  "wall-plank":   { to: "desk-plank",    oldDefault: { reps: 30, active: true } },
+  "chair-squat":  { to: "desk-squat",    oldDefault: { reps: 15, active: true } },
 };
 
 // ── MAIN APP ─────────────────────────────────────────────────────────────────
@@ -112,8 +115,11 @@ function SagePT() {
 
   const [config, setConfig] = useState(() => {
     const saved = S.get("spt_config", null) || {};
-    Object.entries(ID_MIGRATIONS).forEach(([oldId, newId]) => {
-      if (saved[oldId] && !saved[newId]) saved[newId] = saved[oldId];
+    Object.entries(ID_MIGRATIONS).forEach(([oldId, { to, oldDefault }]) => {
+      const oldVal = saved[oldId];
+      if (!oldVal || saved[to]) return;
+      const wasChanged = oldVal.active !== oldDefault.active || oldVal.reps !== oldDefault.reps;
+      if (wasChanged) saved[to] = oldVal;
     });
     // Merge onto current LIBRARY ids: keeps any saved choice, falls back to
     // the default for ids that are new or were never saved. An id missing
