@@ -1,8 +1,9 @@
 // Sage PT service worker.
-// App shell is precached on install. CDN modules (esm.sh) are cached
-// opportunistically as they're fetched, so after the first online load
-// the app keeps working with no signal (e.g. mid-workout, no wifi).
-const CACHE = "sage-pt-v1";
+// App shell: network-first (falls back to cache only if offline), so a new
+// deploy is picked up on the very next load instead of serving a stale bundle
+// indefinitely. CDN modules (esm.sh) rarely change once pinned, so those stay
+// cache-first / opportunistically cached for offline use.
+const CACHE = "sage-pt-v2";
 const SHELL = [
   "./",
   "./index.html",
@@ -33,15 +34,14 @@ self.addEventListener("fetch", (event) => {
   const isSameOrigin = new URL(req.url).origin === self.location.origin;
 
   if (isSameOrigin) {
-    // App shell: cache-first, refresh in background.
+    // App shell: network-first so updates always show up next load.
     event.respondWith(
-      caches.match(req).then((cached) => {
-        const fetchPromise = fetch(req).then((res) => {
+      fetch(req)
+        .then((res) => {
           caches.open(CACHE).then((cache) => cache.put(req, res.clone()));
           return res;
-        }).catch(() => cached);
-        return cached || fetchPromise;
-      })
+        })
+        .catch(() => caches.match(req))
     );
   } else {
     // CDN (esm.sh) modules: stale-while-revalidate so they work offline after first load.
