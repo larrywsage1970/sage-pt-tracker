@@ -92,15 +92,36 @@ function isIOS() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
+// Exercise IDs renamed when the library was rebuilt around a desk + balance
+// board — maps old saved choices forward so they aren't silently dropped.
+const ID_MIGRATIONS = {
+  "wall-pu": "desk-pu",
+  "wide-wall-pu": "wide-desk-pu",
+  "close-wall-pu": "close-desk-pu",
+  "chair-dip": "desk-dip",
+  "pike-pu": "desk-pike-pu",
+  "door-row": "desk-row",
+  "band-row": "band-desk-row",
+  "wall-plank": "desk-plank",
+  "chair-squat": "desk-squat",
+};
+
 // ── MAIN APP ─────────────────────────────────────────────────────────────────
 function SagePT() {
   const [tab, setTab] = useState("today");
 
   const [config, setConfig] = useState(() => {
-    const saved = S.get("spt_config", null);
-    if (saved) return saved;
+    const saved = S.get("spt_config", null) || {};
+    Object.entries(ID_MIGRATIONS).forEach(([oldId, newId]) => {
+      if (saved[oldId] && !saved[newId]) saved[newId] = saved[oldId];
+    });
+    // Merge onto current LIBRARY ids: keeps any saved choice, falls back to
+    // the default for ids that are new or were never saved. An id missing
+    // from LIBRARY entirely (removed exercise) is simply never looked up.
     const c = {};
-    LIBRARY.forEach(ex => { c[ex.id] = { reps: ex.defaultReps, active: DEFAULT_ACTIVE.includes(ex.id) }; });
+    LIBRARY.forEach(ex => {
+      c[ex.id] = saved[ex.id] ?? { reps: ex.defaultReps, active: DEFAULT_ACTIVE.includes(ex.id) };
+    });
     return c;
   });
 

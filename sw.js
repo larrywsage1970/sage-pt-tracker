@@ -3,11 +3,12 @@
 // deploy is picked up on the very next load instead of serving a stale bundle
 // indefinitely. CDN modules (esm.sh) rarely change once pinned, so those stay
 // cache-first / opportunistically cached for offline use.
-const CACHE = "sage-pt-v2";
+// Keep in sync with the ?v= query on app.js in index.html.
+const CACHE = "sage-pt-v3";
 const SHELL = [
   "./",
   "./index.html",
-  "./app.js",
+  "./app.js?v=3",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
