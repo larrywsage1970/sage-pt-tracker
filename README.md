@@ -31,3 +31,8 @@ then open http://localhost:8787. Re-run `scripts/generate-icons.ps1` if you chan
 
 ## Deploy
 Static files only — GitHub Pages serves this repo directly from `main` / root, no CI needed.
+
+## Also in this repo
+
+[`/transposer`](./transposer) — a separate PWA: paste a YouTube song link, see its
+key, transpose it, export an MP3. Its processing backend lives in [`/server`](./server).
