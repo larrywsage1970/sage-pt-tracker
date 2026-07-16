@@ -17,6 +17,14 @@ thin, battery-friendly PWA that works well on a phone.
   pitch-shifts the previously analyzed audio to the target key, encodes MP3,
   returns `{job_id, semitones, download_url}`.
 - `GET /api/jobs/{job_id}/audio.mp3` — the transposed MP3.
+- `POST /api/quick` — `{"url", "target_key", "target_mode"}` → does
+  analyze+transpose+encode in one request and returns the **mp3 bytes
+  directly** (`audio/mpeg`), with `X-Song-Title`, `X-Detected-Key`, and
+  `X-Semitone-Shift` response headers carrying the metadata that would
+  otherwise come back as JSON. Built for callers that can't easily chain two
+  HTTP requests and thread a `job_id` between them — namely iOS Shortcuts.
+  See [`/transposer` README](../transposer/README.md#iphone-shortcut) for the
+  Shortcut build steps.
 - `GET /api/health` — liveness check.
 
 Jobs (and their temp audio files) live in memory/disk for 2 hours, then get

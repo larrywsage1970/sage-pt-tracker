@@ -1,12 +1,16 @@
 """YouTube Audio Transposer backend.
 
-Two endpoints do the heavy lifting server-side (download, key detection,
-pitch shifting, mp3 encoding) so the mobile frontend stays a thin, battery-
-friendly PWA that only uploads a URL and downloads a result:
+These endpoints do the heavy lifting server-side (download, key detection,
+pitch shifting, mp3 encoding) so callers stay thin:
 
-  POST /api/analyze     {url}                     -> detected key + job_id
-  POST /api/transpose   {job_id, target_key, target_mode} -> output_url
-  GET  /api/jobs/{id}/audio.mp3                    -> the transposed file
+  POST /api/analyze     {url}                              -> detected key + job_id
+  POST /api/transpose   {job_id, target_key, target_mode}   -> output_url
+  GET  /api/jobs/{id}/audio.mp3                             -> the transposed file
+  POST /api/quick        {url, target_key, target_mode}     -> the mp3 bytes, in one call
+
+/api/quick exists for iOS Shortcuts: a Shortcut can't easily chain two HTTP
+calls and thread a job_id between them, so it collapses analyze+transpose+
+download into a single request/response.
 """
 from __future__ import annotations
 
@@ -36,6 +40,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Song-Title", "X-Detected-Key", "X-Semitone-Shift"],
 )
 
 
@@ -64,6 +69,18 @@ class TransposeResponse(BaseModel):
     job_id: str
     semitones: int
     download_url: str
+
+
+class QuickRequest(BaseModel):
+    url: str = Field(..., min_length=1)
+    target_key: str
+    target_mode: str = "major"
+
+
+def _ascii_header(value: str) -> str:
+    """HTTP header values must be Latin-1; song titles often aren't (emoji,
+    non-Latin scripts). Strip anything that won't fit rather than 500ing."""
+    return value.encode("ascii", errors="ignore").decode("ascii").strip() or "?"
 
 
 def _download_audio(url: str, job: Job) -> None:
@@ -99,11 +116,10 @@ def _download_audio(url: str, job: Job) -> None:
         raise HTTPException(status_code=502, detail="Audio extraction failed — no output file produced.")
 
 
-@app.post("/api/analyze", response_model=AnalyzeResponse)
-def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
+def _analyze(url: str) -> Job:
     job = create_job()
     try:
-        _download_audio(req.url, job)
+        _download_audio(url, job)
         result = detect_key(str(job.source_wav))
     except HTTPException:
         raise
@@ -117,7 +133,33 @@ def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     job.detected_mode = result["mode"]
     job.detected_label = result["label"]
     job.confidence = result["confidence"]
+    return job
 
+
+def _transpose(job: Job, target_key: str, target_mode: str) -> int:
+    if target_key not in PITCH_CLASSES:
+        raise HTTPException(status_code=400, detail=f"target_key must be one of {PITCH_CLASSES}")
+
+    shift = semitone_shift(job.detected_key, job.detected_mode, target_key, target_mode)
+
+    try:
+        shifted_wav = job.dir / "shifted.wav"
+        pitch_shift_wav(job.source_wav, shifted_wav, shift)
+
+        output_mp3 = job.dir / "output.mp3"
+        export_mp3(shifted_wav, output_mp3)
+    except Exception as e:  # noqa: BLE001
+        log.exception("transpose failed")
+        raise HTTPException(status_code=500, detail=f"Transposition failed: {e}")
+
+    job.output_mp3 = output_mp3
+    job.output_key = f"{target_key} {target_mode}"
+    return shift
+
+
+@app.post("/api/analyze", response_model=AnalyzeResponse)
+def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
+    job = _analyze(req.url)
     return AnalyzeResponse(
         job_id=job.id,
         title=job.title,
@@ -135,24 +177,8 @@ def transpose(req: TransposeRequest) -> TransposeResponse:
     job = get_job(req.job_id)
     if job is None or job.source_wav is None:
         raise HTTPException(status_code=404, detail="Unknown or expired job_id — analyze the URL again.")
-    if req.target_key not in PITCH_CLASSES:
-        raise HTTPException(status_code=400, detail=f"target_key must be one of {PITCH_CLASSES}")
 
-    shift = semitone_shift(job.detected_key, job.detected_mode, req.target_key, req.target_mode)
-
-    try:
-        shifted_wav = job.dir / "shifted.wav"
-        pitch_shift_wav(job.source_wav, shifted_wav, shift)
-
-        output_mp3 = job.dir / "output.mp3"
-        export_mp3(shifted_wav, output_mp3)
-    except Exception as e:  # noqa: BLE001
-        log.exception("transpose failed")
-        raise HTTPException(status_code=500, detail=f"Transposition failed: {e}")
-
-    job.output_mp3 = output_mp3
-    job.output_key = f"{req.target_key} {req.target_mode}"
-
+    shift = _transpose(job, req.target_key, req.target_mode)
     return TransposeResponse(
         job_id=job.id,
         semitones=shift,
@@ -167,6 +193,27 @@ def download(job_id: str) -> FileResponse:
         raise HTTPException(status_code=404, detail="No transposed audio for this job yet.")
     filename = f"{job.title} ({job.output_key}).mp3".replace("/", "-")
     return FileResponse(job.output_mp3, media_type="audio/mpeg", filename=filename)
+
+
+@app.post("/api/quick")
+def quick(req: QuickRequest) -> FileResponse:
+    """One-shot analyze+transpose+download, built for iOS Shortcuts: a
+    single HTTP action in, an mp3 file out. Detected-key metadata rides
+    along as response headers since the body is the audio itself."""
+    job = _analyze(req.url)
+    shift = _transpose(job, req.target_key, req.target_mode)
+
+    filename = f"{job.title} ({job.output_key}).mp3".replace("/", "-")
+    return FileResponse(
+        job.output_mp3,
+        media_type="audio/mpeg",
+        filename=filename,
+        headers={
+            "X-Song-Title": _ascii_header(job.title),
+            "X-Detected-Key": _ascii_header(job.detected_label),
+            "X-Semitone-Shift": str(shift),
+        },
+    )
 
 
 @app.get("/api/health")
