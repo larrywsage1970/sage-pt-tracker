@@ -7,14 +7,15 @@ import htm from "https://esm.sh/htm@3.1.1";
 
 const html = htm.bind(h);
 
-// ── EXERCISE LIBRARY ──────────────────────────────────────────────────────────
+// ── DESK LIBRARY ──────────────────────────────────────────────────────────────
 // Built around a standing desk (in place of a wall) + a small balance board.
-const LIBRARY = [
+const DESK_LIBRARY = [
   // CHEST / PUSH — desk edge in place of a wall
   { id: "desk-pu",       name: "Desk Push-Ups",            muscle: "Chest / Shoulders",    category: "Chest", defaultReps: 15, tip: "Hands shoulder-width on the desk edge, step feet back. Control the descent." },
   { id: "wide-desk-pu",  name: "Wide-Grip Desk Push-Ups",  muscle: "Outer Chest",           category: "Chest", defaultReps: 12, tip: "Hands wider than shoulders on the desk edge. Targets the outer chest more directly." },
   { id: "close-desk-pu", name: "Close-Grip Desk Push-Ups", muscle: "Inner Chest / Triceps", category: "Chest", defaultReps: 10, tip: "Hands close together on the desk, thumbs nearly touching. Hits the inner chest and triceps hard." },
   { id: "desk-dip",      name: "Desk Edge Dips",           muscle: "Chest / Triceps",       category: "Chest", defaultReps: 10, tip: "Hands on the desk edge behind you, feet forward. Lower slowly until elbows hit 90°, push back up." },
+  { id: "desk-pu-neg",   name: "Negative Desk Push-Ups",   muscle: "Chest / Triceps",       category: "Chest", defaultReps: 8,  tip: "Lower yourself as slowly as possible (4–5 count), push back up at normal speed. The slow negative is where it grows." },
   { id: "chest-iso",     name: "Isometric Chest Press",    muscle: "Chest",                 category: "Chest", defaultReps: 10, tip: "Press palms together hard at chest height. Hold 5 sec, release. Pure chest contraction — no equipment." },
   { id: "chest-open",    name: "Standing Chest Fly",       muscle: "Chest / Anterior Delt", category: "Chest", defaultReps: 12, tip: "Arms wide, palms forward. Slowly bring hands together in front of chest like hugging a barrel. Slow return." },
 
@@ -24,6 +25,7 @@ const LIBRARY = [
   { id: "desk-pike-pu", name: "Desk Pike Push-Ups",       muscle: "Shoulders / Triceps",  category: "Shoulders", defaultReps: 8,  tip: "Hands on the desk edge, walk feet back so hips are high. Lower your head toward the desk. Serious shoulder builder." },
   { id: "front-raise",  name: "Front Raise (No Weight)",  muscle: "Front Delts",          category: "Shoulders", defaultReps: 12, tip: "Arms straight, raise forward to shoulder height. Squeeze at top. Hold a bag to add load." },
   { id: "rear-delt",    name: "Rear Delt Squeeze",        muscle: "Rear Delts / Upper Back",category:"Shoulders",defaultReps: 15, tip: "Arms out to sides, bent slightly. Pull elbows back, squeeze shoulder blades. Hold 2 sec." },
+  { id: "desk-y-raise", name: "Desk Y-Raises",            muscle: "Rear Delts / Traps",   category: "Shoulders", defaultReps: 12, tip: "Hinge forward slightly, raise arms up and out into a Y shape, squeeze shoulder blades. Add a light bag for resistance." },
 
   // BACK / PULL — desk-anchored instead of a doorframe
   { id: "desk-row",     name: "Under-Desk Isometric Row", muscle: "Back / Biceps",        category: "Pull",  defaultReps: 10, tip: "Grip the underside of the desk with both hands, pull up hard like you're trying to lift it. Hold 3–5 sec, release." },
@@ -31,7 +33,7 @@ const LIBRARY = [
   { id: "bicep-iso",    name: "Isometric Bicep Curl",     muscle: "Biceps",               category: "Pull",  defaultReps: 12, tip: "Press palm up under the desk edge and resist. Hold 3 sec each arm. Real tension, no weights." },
 
   // ABS / CORE
-  { id: "desk-plank",   name: "Standing Desk Plank",      muscle: "Core / Abs",           category: "Abs",   defaultReps: 30, isTimeBased: true, tip: "Hands on the desk at hip height, step feet back, hold body rigid. Same tension as a floor plank." },
+  { id: "desk-plank",   name: "Standing Desk Plank",      muscle: "Core / Abs",           category: "Abs",   defaultReps: 30, unit: "sec", tip: "Hands on the desk at hip height, step feet back, hold body rigid. Same tension as a floor plank." },
   { id: "stand-crunch", name: "Standing Crunch",          muscle: "Upper Abs",            category: "Abs",   defaultReps: 15, tip: "Hands behind head, bring elbow to opposite knee as knee rises. Slow — squeeze the abs at top." },
   { id: "stand-oblique",name: "Standing Oblique Crunch",  muscle: "Obliques",             category: "Abs",   defaultReps: 12, tip: "Hands behind head, crunch same elbow to same knee. Targets the side abs directly." },
   { id: "side-bend",    name: "Standing Side Bend",       muscle: "Obliques",             category: "Abs",   defaultReps: 15, tip: "Slide one hand down your leg toward the knee. Feel the side stretch and resist back up." },
@@ -39,21 +41,24 @@ const LIBRARY = [
   { id: "anti-rot",     name: "Anti-Rotation Press",      muscle: "Core / Shoulders",     category: "Abs",   defaultReps: 10, tip: "Press palms together at chest. Extend arms forward slowly, hold 3 sec, return. Core resists rotation." },
   { id: "march-stand",  name: "Standing March",           muscle: "Lower Abs / Hip Flexors",category:"Abs",  defaultReps: 20, tip: "Controlled high knees in place. Arms pump opposite to legs. Engages lower abs with every lift." },
   { id: "knee-raise",   name: "Standing Knee Raises",     muscle: "Lower Abs / Hip Flexors",category:"Abs",  defaultReps: 12, tip: "Hold the desk edge for balance. Drive one knee up to waist height, hold 2 sec, lower with control. Alternate legs." },
+  { id: "suitcase-hold",name: "Suitcase Carry Hold",      muscle: "Obliques / Core / Grip",category:"Abs",  defaultReps: 20, unit: "sec", tip: "Hold a weighted bag at your side, stand tall without leaning. Switch sides. Resisting the lean is the whole exercise." },
 
   // LEGS
   { id: "desk-squat",   name: "Desk-Assisted Squat",      muscle: "Quads / Glutes",       category: "Legs",  defaultReps: 15, tip: "Face the desk, hold the edge lightly for balance. Sit hips back into a squat, drive back up." },
   { id: "calf-raise",   name: "Standing Calf Raises",     muscle: "Calves",               category: "Legs",  defaultReps: 20, tip: "Hold the desk for balance. Rise on toes, lower slowly. Pause at the top for a full contraction." },
   { id: "glute-sq",     name: "Standing Glute Squeeze",   muscle: "Glutes",               category: "Legs",  defaultReps: 15, tip: "Stand tall, squeeze both glutes hard for 2 seconds, release. Focused and deliberate." },
   { id: "side-leg",     name: "Side Leg Raises",          muscle: "Hip Abductors",        category: "Legs",  defaultReps: 12, tip: "Hold the desk. Raise one leg out to side with control. Hip stability and balance." },
+  { id: "reverse-lunge",name: "Reverse Lunges",           muscle: "Quads / Glutes",       category: "Legs",  defaultReps: 12, tip: "Hold the desk lightly for balance. Step one leg back into a lunge, drive through the front heel to return. Alternate legs." },
+  { id: "single-leg-dl",name: "Single-Leg Desk Deadlift", muscle: "Hamstrings / Glutes",  category: "Legs",  defaultReps: 10, tip: "Hold the desk with one hand for balance. Hinge at the hips, extend the free leg back, keep your back flat. Slow and controlled." },
 
   // BALANCE BOARD
   { id: "bb-squat",     name: "Balance Board Squats",     muscle: "Quads / Glutes / Ankles",category: "Balance", defaultReps: 12, tip: "Stand on the board, feet shoulder-width. Squat slowly while keeping the board level. Hold the desk if needed." },
   { id: "bb-calf",      name: "Balance Board Calf Raises",muscle: "Calves / Ankles",       category: "Balance", defaultReps: 15, tip: "Rise onto toes while balancing on the board. Control the wobble, lower slow." },
-  { id: "bb-single-leg",name: "Single-Leg Balance Hold",  muscle: "Ankles / Deep Core",    category: "Balance", defaultReps: 30, isTimeBased: true, tip: "Stand on one leg on the board, find stillness, hold. Switch legs for the next set." },
+  { id: "bb-single-leg",name: "Single-Leg Balance Hold",  muscle: "Ankles / Deep Core",    category: "Balance", defaultReps: 30, unit: "sec", tip: "Stand on one leg on the board, find stillness, hold. Switch legs for the next set." },
   { id: "bb-tilt",      name: "Balance Board Tilts",      muscle: "Ankles / Stability",    category: "Balance", defaultReps: 15, tip: "Rock the board side-to-side under control. Each full rock is one rep — builds ankle stability." },
 ];
 
-const DEFAULT_ACTIVE = [
+const DESK_DEFAULT_ACTIVE = [
   "desk-pu","desk-dip","chest-iso",
   "desk-row","bicep-iso",
   "desk-plank","stand-crunch","knee-raise",
@@ -61,17 +66,81 @@ const DEFAULT_ACTIVE = [
   "bb-squat","bb-single-leg"
 ];
 
-const CATEGORY_ORDER = ["Chest","Shoulders","Pull","Abs","Legs","Balance"];
+const DESK_CATEGORY_ORDER = ["Chest","Shoulders","Pull","Abs","Legs","Balance"];
+
+// ── GYM LIBRARY ───────────────────────────────────────────────────────────────
+// Standard Planet Fitness machine circuit. Warm up with a mile on the treadmill.
+// Exact machine names/layout vary by location — swap in whatever's equivalent.
+const GYM_LIBRARY = [
+  // WARM-UP
+  { id: "gym-treadmill", name: "Treadmill Warm-Up",         muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 1, unit: "mile", tip: "Moderate pace, slight incline (1–2%). Gets blood flowing before lifting — don't skip it." },
+
+  // CHEST
+  { id: "gym-chest-press", name: "Chest Press Machine",     muscle: "Chest / Triceps",   category: "Chest", defaultReps: 12, tip: "Adjust seat so handles line up with mid-chest. Press out fully, control the return." },
+  { id: "gym-pec-deck",    name: "Pec Deck / Chest Fly Machine", muscle: "Chest",        category: "Chest", defaultReps: 12, tip: "Elbows slightly bent, squeeze pads together in front of chest. Slow negative." },
+  { id: "gym-smith-bench", name: "Smith Machine Bench Press", muscle: "Chest / Triceps", category: "Chest", defaultReps: 10, tip: "Bar path is fixed — focus on driving through the chest. Start light to learn the groove." },
+
+  // BACK
+  { id: "gym-lat-pulldown", name: "Lat Pulldown Machine",   muscle: "Lats / Biceps",     category: "Back", defaultReps: 12, tip: "Wide grip, pull the bar to your upper chest, squeeze shoulder blades down and back." },
+  { id: "gym-seated-row",   name: "Seated Row Machine",     muscle: "Back / Biceps",     category: "Back", defaultReps: 12, tip: "Chest against the pad, pull handles to torso, squeeze shoulder blades together." },
+  { id: "gym-assisted-pu",  name: "Assisted Pull-Up Machine", muscle: "Back / Biceps",   category: "Back", defaultReps: 8,  tip: "Set assistance so the last rep or two is genuinely hard. Full hang to chin-over-bar." },
+
+  // SHOULDERS
+  { id: "gym-shoulder-press", name: "Shoulder Press Machine", muscle: "Shoulders / Triceps", category: "Shoulders", defaultReps: 12, tip: "Handles start at shoulder height, press straight up without arching the back." },
+  { id: "gym-rear-delt",      name: "Rear Delt / Reverse Fly Machine", muscle: "Rear Delts / Upper Back", category: "Shoulders", defaultReps: 15, tip: "Face into the pad, sweep arms out and back. Light weight, high control." },
+  { id: "gym-cable-lateral",  name: "Cable Lateral Raise",  muscle: "Side Delts",        category: "Shoulders", defaultReps: 12, tip: "Cable at the lowest pin, raise your arm out to the side to shoulder height. Slow on the way down." },
+
+  // LEGS
+  { id: "gym-leg-press",     name: "Leg Press Machine",     muscle: "Quads / Glutes",    category: "Legs", defaultReps: 12, tip: "Feet shoulder-width on the platform. Don't lock your knees out at the top." },
+  { id: "gym-leg-extension", name: "Leg Extension Machine", muscle: "Quads",             category: "Legs", defaultReps: 12, tip: "Pad rests just above the ankle. Extend fully, pause, lower slow." },
+  { id: "gym-leg-curl",      name: "Leg Curl Machine",      muscle: "Hamstrings",        category: "Legs", defaultReps: 12, tip: "Curl heels toward glutes, squeeze, lower with control — don't let the weight drop." },
+  { id: "gym-hip-abductor",  name: "Hip Abductor Machine",  muscle: "Hip Abductors / Glutes", category: "Legs", defaultReps: 15, tip: "Push your knees outward against the pads. Controlled squeeze at the widest point." },
+  { id: "gym-calf-machine",  name: "Seated Calf Raise Machine", muscle: "Calves",        category: "Legs", defaultReps: 15, tip: "Full stretch at the bottom, rise onto toes, pause at the top." },
+
+  // ARMS
+  { id: "gym-bicep-curl",    name: "Cable Bicep Curl",      muscle: "Biceps",            category: "Arms", defaultReps: 12, tip: "Elbows pinned to your sides, curl the bar up, squeeze, lower slow." },
+  { id: "gym-tricep-push",   name: "Tricep Pushdown",       muscle: "Triceps",           category: "Arms", defaultReps: 12, tip: "Elbows pinned to your sides, push the bar down to full extension, control the return." },
+
+  // ABS
+  { id: "gym-ab-crunch",     name: "Ab Crunch Machine",     muscle: "Abs",               category: "Abs", defaultReps: 15, tip: "Curl down and forward, exhale on the crunch, don't yank with your arms." },
+  { id: "gym-torso-rotation",name: "Torso Rotation Machine",muscle: "Obliques",          category: "Abs", defaultReps: 12, tip: "Rotate under control through a comfortable range — don't force the twist." },
+];
+
+const GYM_DEFAULT_ACTIVE = [
+  "gym-treadmill",
+  "gym-chest-press","gym-lat-pulldown","gym-shoulder-press",
+  "gym-leg-press","gym-leg-extension","gym-leg-curl","gym-calf-machine",
+  "gym-bicep-curl","gym-tricep-push",
+  "gym-ab-crunch","gym-seated-row"
+];
+
+const GYM_CATEGORY_ORDER = ["Warmup","Chest","Back","Shoulders","Legs","Arms","Abs"];
+
+// ── COMBINED ──────────────────────────────────────────────────────────────────
+const LIBRARY = [
+  ...DESK_LIBRARY.map(ex => ({ ...ex, section: "desk" })),
+  ...GYM_LIBRARY.map(ex => ({ ...ex, section: "gym" })),
+];
+const DEFAULT_ACTIVE = [...DESK_DEFAULT_ACTIVE, ...GYM_DEFAULT_ACTIVE];
+
+const SECTIONS = {
+  desk: { label: "Desk", categoryOrder: DESK_CATEGORY_ORDER },
+  gym:  { label: "Gym",  categoryOrder: GYM_CATEGORY_ORDER },
+};
+
 const CATEGORY_COLOR = {
   Chest:     "#c87a5a",
   Shoulders: "#ae8c6a",
   Pull:      "#6a8cae",
+  Back:      "#6a8cae",
   Abs:       "#7c9e6a",
   Legs:      "#9e7a9e",
   Balance:   "#5a9ea8",
+  Arms:      "#c8a45a",
+  Warmup:    "#8a8a7a",
 };
 
-const BACKUP_VERSION = 2;
+const BACKUP_VERSION = 3;
 
 // ── STORAGE ──────────────────────────────────────────────────────────────────
 const S = {
@@ -111,7 +180,7 @@ const ID_MIGRATIONS = {
 
 // ── MAIN APP ─────────────────────────────────────────────────────────────────
 function SagePT() {
-  const [tab, setTab] = useState("today");
+  const [tab, setTab] = useState("desk");
 
   const [config, setConfig] = useState(() => {
     const saved = S.get("spt_config", null) || {};
@@ -131,22 +200,28 @@ function SagePT() {
     return c;
   });
 
-  const [checked, setChecked] = useState(() => S.get("spt_checked_" + todayKey(), {}));
+  const [checked, setChecked] = useState(() => ({
+    desk: S.get("spt_checked_desk_" + todayKey(), {}),
+    gym: S.get("spt_checked_gym_" + todayKey(), {}),
+  }));
   const [log, setLog] = useState(() => S.get("spt_log", []));
 
   useEffect(() => { S.set("spt_config", config); }, [config]);
-  useEffect(() => { S.set("spt_checked_" + todayKey(), checked); }, [checked]);
+  useEffect(() => { S.set("spt_checked_desk_" + todayKey(), checked.desk); }, [checked.desk]);
+  useEffect(() => { S.set("spt_checked_gym_" + todayKey(), checked.gym); }, [checked.gym]);
 
-  const activeExercises = LIBRARY.filter(ex => config[ex.id]?.active);
+  const activeFor = (section) => LIBRARY.filter(ex => ex.section === section && config[ex.id]?.active);
 
-  // Auto-log today's progress as it happens — no separate "mark complete" step
-  // to remember. As soon as anything is checked, today shows up in the Log tab
-  // and keeps updating live; unchecking everything removes the (empty) entry.
-  useEffect(() => {
-    const total = activeExercises.length;
-    const done = activeExercises.filter(ex => checked[ex.id]).length;
+  // Auto-log today's progress per section as it happens — no separate "mark
+  // complete" step to remember. As soon as anything is checked, today shows
+  // up in the Log tab and keeps updating live; unchecking everything in a
+  // section removes that section's (empty) entry for today.
+  const autoLog = (section, sectionChecked) => {
+    const active = activeFor(section);
+    const total = active.length;
+    const done = active.filter(ex => sectionChecked[ex.id]).length;
     setLog(prev => {
-      const others = prev.filter(e => e.dateKey !== todayKey());
+      const others = prev.filter(e => !(e.dateKey === todayKey() && e.section === section));
       if (done === 0) {
         if (others.length === prev.length) return prev; // nothing to remove
         S.set("spt_log", others);
@@ -154,18 +229,21 @@ function SagePT() {
       }
       const entry = {
         dateKey: todayKey(),
+        section,
         dateLabel: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
         timestamp: Date.now(),
         done, total,
         pct: total ? Math.round((done/total)*100) : 0,
-        exercises: activeExercises.map(ex => ({ id: ex.id, name: ex.name, reps: config[ex.id]?.reps ?? ex.defaultReps, done: !!checked[ex.id] }))
+        exercises: active.map(ex => ({ id: ex.id, name: ex.name, reps: config[ex.id]?.reps ?? ex.defaultReps, done: !!sectionChecked[ex.id] }))
       };
       const newLog = [entry, ...others];
       S.set("spt_log", newLog);
       return newLog;
     });
-    // eslint-disable-next-line
-  }, [checked, config]);
+  };
+
+  useEffect(() => { autoLog("desk", checked.desk); }, [checked.desk, config]);
+  useEffect(() => { autoLog("gym", checked.gym); }, [checked.gym, config]);
 
   const streak = (() => {
     let s = 0, d = new Date();
@@ -178,7 +256,7 @@ function SagePT() {
   })();
   const weekCount = log.filter(e => Date.now() - new Date(e.dateKey).getTime() < 7*86400000).length;
 
-  const toggleCheck = (id) => setChecked(p => ({ ...p, [id]: !p[id] }));
+  const toggleCheck = (section, id) => setChecked(p => ({ ...p, [section]: { ...p[section], [id]: !p[section][id] } }));
 
   const updateReps = (id, delta) => {
     setConfig(p => ({ ...p, [id]: { ...p[id], reps: Math.max(1, (p[id]?.reps ?? 10) + delta) } }));
@@ -186,8 +264,6 @@ function SagePT() {
   const toggleActive = (id) => {
     setConfig(p => ({ ...p, [id]: { ...p[id], active: !p[id]?.active } }));
   };
-
-  const todayLogged = log.find(e => e.dateKey === todayKey());
 
   const exportData = () => {
     const payload = { version: BACKUP_VERSION, exportedAt: new Date().toISOString(), config, log };
@@ -215,9 +291,9 @@ function SagePT() {
     reader.readAsText(file);
   };
 
-  const resetToday = () => {
-    if (!confirm("Clear today's checkmarks?")) return;
-    setChecked({});
+  const resetToday = (section) => {
+    if (!confirm(`Clear today's ${SECTIONS[section].label} checkmarks?`)) return;
+    setChecked(p => ({ ...p, [section]: {} }));
   };
 
   return html`
@@ -225,7 +301,7 @@ function SagePT() {
       <div style=${styles.header}>
         <div style=${styles.headerInner}>
           <div>
-            <div style=${styles.badge}>SAGE PT · DESK EDITION</div>
+            <div style=${styles.badge}>SAGE PT</div>
             <div style=${styles.h1}>DAILY PT</div>
             <div style=${styles.dateStr}>${todayStr()}</div>
           </div>
@@ -237,18 +313,19 @@ function SagePT() {
       </div>
 
       <div style=${styles.tabs}>
-        ${[["today","TODAY"],["library","LIBRARY"],["log","LOG"],["more","MORE"]].map(([k,l]) => html`
+        ${[["desk","DESK"],["gym","GYM"],["library","LIBRARY"],["log","LOG"],["more","MORE"]].map(([k,l]) => html`
           <button key=${k} style=${{...styles.tab, ...(tab===k ? styles.tabActive : {})}} onClick=${() => setTab(k)}>${l}</button>
         `)}
       </div>
 
       <div style=${styles.content}>
-        ${tab === "today" && html`<${TodayTab}
-          exercises=${activeExercises}
+        ${(tab === "desk" || tab === "gym") && html`<${SectionTab}
+          section=${tab}
+          exercises=${activeFor(tab)}
           config=${config}
-          checked=${checked}
-          onCheck=${toggleCheck}
-          todayLogged=${todayLogged}
+          checked=${checked[tab]}
+          onCheck=${(id) => toggleCheck(tab, id)}
+          todayLogged=${log.find(e => e.dateKey === todayKey() && e.section === tab)}
         />`}
         ${tab === "library" && html`<${LibraryTab} config=${config} onToggleActive=${toggleActive} onUpdateReps=${updateReps} />`}
         ${tab === "log" && html`<${LogTab} log=${log} />`}
@@ -258,9 +335,10 @@ function SagePT() {
   `;
 }
 
-// ── TODAY TAB ─────────────────────────────────────────────────────────────────
-function TodayTab({ exercises, config, checked, onCheck, todayLogged }) {
-  const groups = CATEGORY_ORDER.map(cat => ({
+// ── SECTION TAB (Desk / Gym) ──────────────────────────────────────────────────
+function SectionTab({ section, exercises, config, checked, onCheck, todayLogged }) {
+  const categoryOrder = SECTIONS[section].categoryOrder;
+  const groups = categoryOrder.map(cat => ({
     cat, items: exercises.filter(ex => ex.category === cat)
   })).filter(g => g.items.length > 0);
 
@@ -300,7 +378,7 @@ function TodayTab({ exercises, config, checked, onCheck, todayLogged }) {
                 </div>
                 <div style=${styles.repBadge}>
                   <div style=${styles.repNum}>${reps}</div>
-                  <div style=${styles.repUnit}>${ex.isTimeBased ? "SEC" : "REPS"}</div>
+                  <div style=${styles.repUnit}>${(ex.unit || "reps").toUpperCase()}</div>
                 </div>
               </div>
             `;
@@ -315,12 +393,22 @@ function TodayTab({ exercises, config, checked, onCheck, todayLogged }) {
 
 // ── LIBRARY TAB ───────────────────────────────────────────────────────────────
 function LibraryTab({ config, onToggleActive, onUpdateReps }) {
+  const [section, setSection] = useState("desk");
   const [filter, setFilter] = useState("All");
-  const cats = ["All", ...CATEGORY_ORDER];
-  const visible = LIBRARY.filter(ex => filter === "All" || ex.category === filter);
+  const cats = ["All", ...SECTIONS[section].categoryOrder];
+  const visible = LIBRARY.filter(ex => ex.section === section && (filter === "All" || ex.category === filter));
 
   return html`
     <div>
+      <div style=${styles.filterRow}>
+        ${["desk","gym"].map(s => html`
+          <button key=${s} style=${{...styles.pill, ...styles.sectionPill, ...(section===s ? styles.pillActive : {})}}
+            onClick=${() => { setSection(s); setFilter("All"); }}>
+            ${SECTIONS[s].label.toUpperCase()}
+          </button>
+        `)}
+      </div>
+
       <div style=${styles.filterRow}>
         ${cats.map(c => html`
           <button key=${c} style=${{...styles.pill, ...(filter===c ? styles.pillActive : {})}} onClick=${() => setFilter(c)}>
@@ -330,7 +418,7 @@ function LibraryTab({ config, onToggleActive, onUpdateReps }) {
       </div>
 
       <div style=${styles.infoBox}>
-        Toggle exercises on/off for your daily routine. Adjust reps with +/−. Changes save instantly.
+        Toggle exercises on/off for your ${SECTIONS[section].label} routine. Adjust reps with +/−. Changes save instantly.
       </div>
 
       ${visible.map(ex => {
@@ -364,14 +452,17 @@ function LibraryTab({ config, onToggleActive, onUpdateReps }) {
 
 // ── LOG TAB ───────────────────────────────────────────────────────────────────
 function LogTab({ log }) {
-  if (!log.length) return html`<div style=${styles.empty}>No workouts logged yet.<br />Check off an exercise on the Today tab to start today's entry.</div>`;
+  if (!log.length) return html`<div style=${styles.empty}>No workouts logged yet.<br />Check off an exercise on the Desk or Gym tab to start today's entry.</div>`;
 
   return html`
     <div>
       ${log.map((entry, i) => html`
-        <div key=${i} style=${styles.logEntry}>
+        <div key=${i} style=${{...styles.logEntry, borderLeftColor: entry.section === "gym" ? "#6a8cae" : "#4a5240"}}>
           <div>
-            <div style=${styles.logDate}>${entry.dateLabel}</div>
+            <div style=${styles.logDate}>
+              ${entry.dateLabel}
+              <span style=${{...styles.sectionTag, color: entry.section === "gym" ? "#6a8cae" : "#8fa068"}}>${(SECTIONS[entry.section]?.label || entry.section).toUpperCase()}</span>
+            </div>
             <div style=${styles.logDetail}>${entry.done} of ${entry.total} exercises</div>
             <div style=${styles.logExList}>${entry.exercises?.filter(e => e.done).map(e => e.name).join(" · ")}</div>
           </div>
@@ -417,10 +508,17 @@ function MoreTab({ onExport, onImport, onResetToday }) {
       <div style=${{...styles.phaseLabel, borderColor:"#c05a5a", color:"#c05a5a", marginTop: 24}}>DANGER ZONE</div>
       <div style=${styles.libCard}>
         <div style=${{flex:1}}>
-          <div style=${styles.libName}>Reset today's checkmarks</div>
+          <div style=${styles.libName}>Reset today's Desk checkmarks</div>
           <div style=${styles.libMuscle}>Doesn't affect past log entries</div>
         </div>
-        <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${onResetToday}>RESET</button>
+        <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${() => onResetToday("desk")}>RESET</button>
+      </div>
+      <div style=${styles.libCard}>
+        <div style=${{flex:1}}>
+          <div style=${styles.libName}>Reset today's Gym checkmarks</div>
+          <div style=${styles.libMuscle}>Doesn't affect past log entries</div>
+        </div>
+        <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${() => onResetToday("gym")}>RESET</button>
       </div>
 
       <div style=${{height: 40}} />
@@ -453,7 +551,7 @@ const styles = {
   statLabel: { fontSize:9, letterSpacing:"0.15em", color:"#6a7a5a", textTransform:"uppercase" },
 
   tabs: { display:"flex", background:"#0a0c07", borderBottom:"1px solid #2a2a20" },
-  tab: { flex:1, padding:"12px 4px", background:"transparent", border:"none", borderBottom:"2px solid transparent", color:"#555", fontSize:11, letterSpacing:"0.12em", cursor:"pointer", fontWeight:600 },
+  tab: { flex:1, padding:"12px 4px", background:"transparent", border:"none", borderBottom:"2px solid transparent", color:"#555", fontSize:11, letterSpacing:"0.1em", cursor:"pointer", fontWeight:600 },
   tabActive: { color:"#c8b89a", borderBottomColor:"#c8b89a", background:"#0f1109" },
 
   content: { padding:"0 16px" },
@@ -480,6 +578,7 @@ const styles = {
 
   filterRow: { display:"flex", gap:6, padding:"14px 0 10px", flexWrap:"wrap" },
   pill: { padding:"5px 10px", background:"#1a1c18", border:"1px solid #333", color:"#666", fontSize:10, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2 },
+  sectionPill: { flex:1, textAlign:"center", fontWeight:700 },
   pillActive: { background:"#4a5240", borderColor:"#4a5240", color:"#e8dcc8" },
 
   libCard: { background:"#161810", border:"1px solid #222", borderRadius:2, marginBottom:8, padding:"12px", display:"flex", justifyContent:"space-between", alignItems:"center", opacity:0.6, gap: 10 },
@@ -497,6 +596,7 @@ const styles = {
 
   logEntry: { background:"#161810", border:"1px solid #222", borderLeft:"3px solid #4a5240", borderRadius:2, padding:"12px 14px", marginBottom:8, display:"flex", justifyContent:"space-between", alignItems:"flex-start" },
   logDate: { fontSize:14, fontWeight:700, color:"#c8b89a", marginBottom:2 },
+  sectionTag: { fontSize:9, fontWeight:700, letterSpacing:"0.1em", marginLeft:8 },
   logDetail: { fontSize:11, color:"#6a7a5a", marginBottom:4 },
   logExList: { fontSize:10, color:"#4a5a40", lineHeight:1.5 },
   logPct: { fontSize:"1.6rem", fontWeight:800, color:"#8fa068" },
