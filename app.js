@@ -321,7 +321,7 @@ function SagePT() {
       </div>
 
       <div style=${styles.tabs}>
-        ${[["desk","DESK"],["gym","GYM"],["library","LIBRARY"],["log","LOG"],["more","MORE"]].map(([k,l]) => html`
+        ${[["desk","DESK"],["gym","GYM"],["grades","GRADES"],["library","LIBRARY"],["log","LOG"],["more","MORE"]].map(([k,l]) => html`
           <button key=${k} style=${{...styles.tab, ...(tab===k ? styles.tabActive : {})}} onClick=${() => setTab(k)}>${l}</button>
         `)}
       </div>
@@ -335,6 +335,7 @@ function SagePT() {
           onCheck=${(id) => toggleCheck(tab, id)}
           todayLogged=${log.find(e => e.dateKey === todayKey() && e.section === tab)}
         />`}
+        ${tab === "grades" && html`<${GradesTab} />`}
         ${tab === "library" && html`<${LibraryTab} config=${config} onToggleActive=${toggleActive} onUpdateReps=${updateReps} />`}
         ${tab === "log" && html`<${LogTab} log=${log} />`}
         ${tab === "more" && html`<${MoreTab} onExport=${exportData} onImport=${importData} onResetToday=${resetToday} />`}
@@ -485,6 +486,58 @@ function LogTab({ log }) {
   `;
 }
 
+// ── GRADES TAB ────────────────────────────────────────────────────────────────
+// Reads data/grades.json, kept up to date by the scheduled ProgressBook
+// scraper (.github/workflows/scrape-progressbook.yml). No login here —
+// this tab only ever displays what the scraper last wrote.
+function GradesTab() {
+  const [state, setState] = useState({ loading: true, error: false, data: null });
+
+  useEffect(() => {
+    fetch("./data/grades.json", { cache: "no-store" })
+      .then(res => { if (!res.ok) throw new Error("fetch failed"); return res.json(); })
+      .then(data => setState({ loading: false, error: false, data }))
+      .catch(() => setState({ loading: false, error: true, data: null }));
+  }, []);
+
+  if (state.loading) return html`<div style=${styles.empty}>Loading grades…</div>`;
+  if (state.error) return html`<div style=${styles.empty}>Couldn't load grades data.<br />Check that the ProgressBook scraper has run.</div>`;
+
+  const { updatedAt, courses } = state.data;
+
+  if (!courses?.length) {
+    return html`<div style=${styles.empty}>No grade data yet.<br />The scraper hasn't synced ProgressBook, or hasn't been set up.</div>`;
+  }
+
+  return html`
+    <div style=${{paddingTop: 14}}>
+      ${updatedAt && html`<div style=${styles.gradesUpdated}>Updated ${new Date(updatedAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}</div>`}
+      ${courses.map((course, i) => html`
+        <div key=${i} style=${{...styles.courseCard, borderLeftColor: course.missingAssignments?.length ? "#c05a5a" : "#4a5240"}}>
+          <div style=${styles.courseHead}>
+            <div>
+              <div style=${styles.courseName}>${course.name}</div>
+              ${course.teacher && html`<div style=${styles.courseTeacher}>${course.teacher}</div>`}
+            </div>
+            ${course.grade && html`<div style=${styles.courseGrade}>${course.grade}</div>`}
+          </div>
+          ${course.missingAssignments?.length > 0 && html`
+            <div style=${styles.missingList}>
+              ${course.missingAssignments.map((a, j) => html`
+                <div key=${j} style=${styles.missingItem}>
+                  <span>${a.name}</span>
+                  ${a.dueDate && html`<span style=${styles.missingDue}>${a.dueDate}</span>`}
+                </div>
+              `)}
+            </div>
+          `}
+        </div>
+      `)}
+      <div style=${{height: 40}} />
+    </div>
+  `;
+}
+
 // ── MORE TAB ──────────────────────────────────────────────────────────────────
 function MoreTab({ onExport, onImport, onResetToday }) {
   const [showInstall] = useState(!isStandalone() && isIOS());
@@ -614,6 +667,16 @@ const styles = {
 
   infoBox: { background:"#131510", border:"1px solid #2a2a20", borderRadius:2, padding:"12px 14px", marginBottom:14, fontSize:12, color:"#a3ab98", lineHeight:1.6 },
   empty: { textAlign:"center", padding:"60px 20px", color:"#8a8a8a", fontSize:13, lineHeight:2 },
+
+  gradesUpdated: { fontSize:10, color:"#8a8a8a", letterSpacing:"0.1em", textAlign:"right", marginBottom:10 },
+  courseCard: { background:"#161810", border:"1px solid #2a2a20", borderLeft:"4px solid #4a5240", borderRadius:2, marginBottom:10, padding:"12px 14px" },
+  courseHead: { display:"flex", justifyContent:"space-between", alignItems:"flex-start" },
+  courseName: { fontSize:15, fontWeight:700, color:"#e8dcc8" },
+  courseTeacher: { fontSize:11, color:"#9aab8a", letterSpacing:"0.06em", marginTop:2 },
+  courseGrade: { fontSize:"1.4rem", fontWeight:800, color:"#c8b89a", lineHeight:1 },
+  missingList: { marginTop:10, paddingTop:10, borderTop:"1px solid #2a2a20" },
+  missingItem: { display:"flex", justifyContent:"space-between", fontSize:12, color:"#e0a8a8", padding:"3px 0", gap:10 },
+  missingDue: { color:"#a37070", fontSize:11, whiteSpace:"nowrap" },
 };
 
 render(html`<${SagePT} />`, document.getElementById("root"));
