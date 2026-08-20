@@ -161,6 +161,14 @@ function isIOS() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
+// Log entries created before the Desk/Gym split have no `section` field.
+// Without a fallback, rendering them (SECTIONS[undefined]?.label || undefined)
+// throws when .toUpperCase() hits that undefined — which is what froze the
+// Log tab. Treat anything unsectioned as "desk", since that's all there was.
+function normalizeLog(arr) {
+  return (Array.isArray(arr) ? arr : []).map(e => e.section ? e : { ...e, section: "desk" });
+}
+
 // Exercise IDs renamed when the library was rebuilt around a desk + balance
 // board — maps old saved choices forward so they aren't silently dropped.
 // Paired with each old id's original default, so an untouched entry (still
@@ -204,7 +212,7 @@ function SagePT() {
     desk: S.get("spt_checked_desk_" + todayKey(), {}),
     gym: S.get("spt_checked_gym_" + todayKey(), {}),
   }));
-  const [log, setLog] = useState(() => S.get("spt_log", []));
+  const [log, setLog] = useState(() => normalizeLog(S.get("spt_log", [])));
 
   useEffect(() => { S.set("spt_config", config); }, [config]);
   useEffect(() => { S.set("spt_checked_desk_" + todayKey(), checked.desk); }, [checked.desk]);
@@ -282,7 +290,7 @@ function SagePT() {
       try {
         const data = JSON.parse(reader.result);
         if (data.config) { setConfig(data.config); S.set("spt_config", data.config); }
-        if (Array.isArray(data.log)) { setLog(data.log); S.set("spt_log", data.log); }
+        if (Array.isArray(data.log)) { const normalized = normalizeLog(data.log); setLog(normalized); S.set("spt_log", normalized); }
         alert("Backup restored.");
       } catch {
         alert("Couldn't read that file — make sure it's a Sage PT backup JSON.");
@@ -456,19 +464,22 @@ function LogTab({ log }) {
 
   return html`
     <div>
-      ${log.map((entry, i) => html`
-        <div key=${i} style=${{...styles.logEntry, borderLeftColor: entry.section === "gym" ? "#6a8cae" : "#4a5240"}}>
+      ${log.map((entry, i) => {
+        const section = entry.section || "desk";
+        return html`
+        <div key=${i} style=${{...styles.logEntry, borderLeftColor: section === "gym" ? "#6a8cae" : "#4a5240"}}>
           <div>
             <div style=${styles.logDate}>
               ${entry.dateLabel}
-              <span style=${{...styles.sectionTag, color: entry.section === "gym" ? "#6a8cae" : "#8fa068"}}>${(SECTIONS[entry.section]?.label || entry.section).toUpperCase()}</span>
+              <span style=${{...styles.sectionTag, color: section === "gym" ? "#6a8cae" : "#8fa068"}}>${(SECTIONS[section]?.label || section).toUpperCase()}</span>
             </div>
             <div style=${styles.logDetail}>${entry.done} of ${entry.total} exercises</div>
             <div style=${styles.logExList}>${entry.exercises?.filter(e => e.done).map(e => e.name).join(" · ")}</div>
           </div>
           <div style=${styles.logPct}>${entry.pct}%</div>
         </div>
-      `)}
+      `;
+      })}
       <div style=${{height: 40}} />
     </div>
   `;
@@ -487,7 +498,7 @@ function MoreTab({ onExport, onImport, onResetToday }) {
         </div>
       `}
 
-      <div style=${{...styles.phaseLabel, borderColor:"#6a7a5a", color:"#6a7a5a"}}>DATA</div>
+      <div style=${{...styles.phaseLabel, borderColor:"#9aab8a", color:"#9aab8a"}}>DATA</div>
       <div style=${styles.libCard}>
         <div style=${{flex:1}}>
           <div style=${styles.libName}>Backup your data</div>
@@ -542,16 +553,16 @@ const styles = {
 
   header: { background:"linear-gradient(135deg,#2d3424 0%,#1a1c18 100%)", borderBottom:"2px solid #4a5240", padding:"20px 20px 16px" },
   headerInner: { display:"flex", justifyContent:"space-between", alignItems:"flex-start" },
-  badge: { fontSize:10, letterSpacing:"0.2em", color:"#6a7a5a", textTransform:"uppercase", marginBottom:4 },
+  badge: { fontSize:10, letterSpacing:"0.2em", color:"#9aab8a", textTransform:"uppercase", marginBottom:4 },
   h1: { fontSize:"2.4rem", fontWeight:800, letterSpacing:"0.06em", color:"#e8dcc8", lineHeight:1 },
-  dateStr: { fontSize:10, color:"#6a7a5a", letterSpacing:"0.12em", marginTop:4 },
+  dateStr: { fontSize:10, color:"#9aab8a", letterSpacing:"0.12em", marginTop:4 },
   statsBlock: { display:"flex", gap:16, alignItems:"flex-start" },
   stat: { textAlign:"right" },
   statNum: { fontSize:"1.8rem", fontWeight:800, color:"#8fa068", lineHeight:1 },
-  statLabel: { fontSize:9, letterSpacing:"0.15em", color:"#6a7a5a", textTransform:"uppercase" },
+  statLabel: { fontSize:9, letterSpacing:"0.15em", color:"#9aab8a", textTransform:"uppercase" },
 
   tabs: { display:"flex", background:"#0a0c07", borderBottom:"1px solid #2a2a20" },
-  tab: { flex:1, padding:"12px 4px", background:"transparent", border:"none", borderBottom:"2px solid transparent", color:"#555", fontSize:11, letterSpacing:"0.1em", cursor:"pointer", fontWeight:600 },
+  tab: { flex:1, padding:"12px 4px", background:"transparent", border:"none", borderBottom:"2px solid transparent", color:"#8a8a8a", fontSize:11, letterSpacing:"0.1em", cursor:"pointer", fontWeight:600 },
   tabActive: { color:"#c8b89a", borderBottomColor:"#c8b89a", background:"#0f1109" },
 
   content: { padding:"0 16px" },
@@ -559,7 +570,7 @@ const styles = {
   progressWrap: { padding:"14px 0 4px" },
   progressBar: { height:4, background:"#2a2a20", borderRadius:2, overflow:"hidden" },
   progressFill: { height:"100%", background:"#8fa068", transition:"width 0.3s ease", borderRadius:2 },
-  progressLabel: { fontSize:11, color:"#6a7a5a", letterSpacing:"0.1em", marginTop:6, textAlign:"right" },
+  progressLabel: { fontSize:11, color:"#9aab8a", letterSpacing:"0.1em", marginTop:6, textAlign:"right" },
 
   phaseLabel: { fontSize:11, fontWeight:700, letterSpacing:"0.2em", borderLeft:"3px solid", paddingLeft:8, margin:"18px 0 10px", textTransform:"uppercase" },
 
@@ -569,15 +580,15 @@ const styles = {
   checkBtnDone: { background:"#8fa068", borderColor:"#8fa068", color:"#0f1109" },
   exInfo: { flex:1 },
   exName: { fontSize:15, fontWeight:600, color:"#e8dcc8", marginBottom:2 },
-  exNameDone: { textDecoration:"line-through", color:"#555" },
-  exMuscle: { fontSize:10, color:"#6a7a5a", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:4 },
-  exTip: { fontSize:11, color:"#7a8070", lineHeight:1.5 },
+  exNameDone: { textDecoration:"line-through", color:"#8a8a8a" },
+  exMuscle: { fontSize:10, color:"#9aab8a", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:4 },
+  exTip: { fontSize:11, color:"#a3ab98", lineHeight:1.5 },
   repBadge: { textAlign:"center", minWidth:36 },
   repNum: { fontSize:"1.4rem", fontWeight:800, color:"#c8b89a", lineHeight:1 },
-  repUnit: { fontSize:8, color:"#555", letterSpacing:"0.12em" },
+  repUnit: { fontSize:8, color:"#8a8a8a", letterSpacing:"0.12em" },
 
   filterRow: { display:"flex", gap:6, padding:"14px 0 10px", flexWrap:"wrap" },
-  pill: { padding:"5px 10px", background:"#1a1c18", border:"1px solid #333", color:"#666", fontSize:10, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2 },
+  pill: { padding:"5px 10px", background:"#1a1c18", border:"1px solid #333", color:"#999", fontSize:10, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2 },
   sectionPill: { flex:1, textAlign:"center", fontWeight:700 },
   pillActive: { background:"#4a5240", borderColor:"#4a5240", color:"#e8dcc8" },
 
@@ -586,23 +597,23 @@ const styles = {
   libLeft: { display:"flex", alignItems:"center", gap:10, flex:1 },
   catDot: { width:8, height:8, borderRadius:"50%", flexShrink:0 },
   libName: { fontSize:13, fontWeight:600, color:"#e8dcc8", marginBottom:2 },
-  libMuscle: { fontSize:10, color:"#6a7a5a", letterSpacing:"0.08em" },
+  libMuscle: { fontSize:10, color:"#9aab8a", letterSpacing:"0.08em" },
   libRight: { display:"flex", alignItems:"center", gap:10 },
   repControl: { display:"flex", alignItems:"center", gap:6 },
   repBtn: { width:24, height:24, background:"#2a2a20", border:"none", color:"#c8b89a", fontSize:14, cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center" },
   repVal: { fontSize:"1.1rem", fontWeight:700, color:"#c8b89a", minWidth:28, textAlign:"center" },
-  toggleBtn: { padding:"5px 10px", background:"#2a2020", border:"1px solid #3a2020", color:"#555", fontSize:10, fontWeight:700, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2, minWidth:40 },
+  toggleBtn: { padding:"5px 10px", background:"#2a2020", border:"1px solid #3a2020", color:"#8a8a8a", fontSize:10, fontWeight:700, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2, minWidth:40 },
   toggleBtnOn: { background:"#2a3a20", borderColor:"#4a6a30", color:"#8fa068" },
 
   logEntry: { background:"#161810", border:"1px solid #222", borderLeft:"3px solid #4a5240", borderRadius:2, padding:"12px 14px", marginBottom:8, display:"flex", justifyContent:"space-between", alignItems:"flex-start" },
   logDate: { fontSize:14, fontWeight:700, color:"#c8b89a", marginBottom:2 },
   sectionTag: { fontSize:9, fontWeight:700, letterSpacing:"0.1em", marginLeft:8 },
-  logDetail: { fontSize:11, color:"#6a7a5a", marginBottom:4 },
-  logExList: { fontSize:10, color:"#4a5a40", lineHeight:1.5 },
+  logDetail: { fontSize:11, color:"#9aab8a", marginBottom:4 },
+  logExList: { fontSize:10, color:"#7f9270", lineHeight:1.5 },
   logPct: { fontSize:"1.6rem", fontWeight:800, color:"#8fa068" },
 
-  infoBox: { background:"#131510", border:"1px solid #2a2a20", borderRadius:2, padding:"12px 14px", marginBottom:14, fontSize:12, color:"#7a8070", lineHeight:1.6 },
-  empty: { textAlign:"center", padding:"60px 20px", color:"#444", fontSize:13, lineHeight:2 },
+  infoBox: { background:"#131510", border:"1px solid #2a2a20", borderRadius:2, padding:"12px 14px", marginBottom:14, fontSize:12, color:"#a3ab98", lineHeight:1.6 },
+  empty: { textAlign:"center", padding:"60px 20px", color:"#8a8a8a", fontSize:13, lineHeight:2 },
 };
 
 render(html`<${SagePT} />`, document.getElementById("root"));
