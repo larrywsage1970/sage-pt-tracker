@@ -69,27 +69,32 @@ const DESK_DEFAULT_ACTIVE = [
 const DESK_CATEGORY_ORDER = ["Chest","Shoulders","Pull","Abs","Legs","Balance"];
 
 // ── GYM LIBRARY ───────────────────────────────────────────────────────────────
-// Standard Planet Fitness machine circuit. Warm up with a mile on the treadmill.
-// Exact machine names/layout vary by location — swap in whatever's equivalent.
-// Strength machines carry Sets + Reps + Weight (weight adjustable per exercise
-// in the Library, starting from defaultWeight below). Cardio/warm-up items are
-// flagged `cardio: true` and keep the simpler distance-only display — sets and
-// weight don't cleanly apply to a treadmill warmup, so they're deliberately
-// left out rather than forced into the same schema.
+// Standard Planet Fitness machine circuit. Warm up with a mile on the treadmill
+// (or the bike/elliptical). Exact machine names/layout vary by location — swap
+// in whatever's equivalent.
+// Every strength machine carries Sets + Reps + Weight (weight adjustable per
+// exercise in the Library, starting from defaultWeight below). Two kinds of
+// exception, both deliberate: `cardio: true` items (treadmill/bike/elliptical)
+// keep the simpler distance-or-duration display — sets/weight don't apply to
+// a warmup. `hasWeight: false` (currently just Captain's Chair) marks a
+// bodyweight-only apparatus with no weight stack to adjust.
 const GYM_LIBRARY = [
   // WARM-UP
   { id: "gym-treadmill", name: "Treadmill Warm-Up",         muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 1, unit: "mile", cardio: true, tip: "Moderate pace, slight incline (1–2%). Gets blood flowing before lifting — don't skip it." },
+  { id: "gym-bike",      name: "Stationary Bike Warm-Up",   muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 10, unit: "min", cardio: true, tip: "Easy-moderate resistance, steady cadence. A lower-impact alternative to the treadmill." },
+  { id: "gym-elliptical",name: "Elliptical Warm-Up",        muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 10, unit: "min", cardio: true, tip: "Full-body, joint-friendly warm-up. Use the arm handles too, not just the legs." },
 
   // CHEST
   { id: "gym-chest-press", name: "Chest Press Machine",     muscle: "Chest / Triceps",   category: "Chest", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 50, tip: "Adjust seat so handles line up with mid-chest. Press out fully, control the return." },
   { id: "gym-pec-deck",    name: "Pec Deck / Chest Fly Machine", muscle: "Chest",        category: "Chest", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Elbows slightly bent, squeeze pads together in front of chest. Slow negative." },
   { id: "gym-smith-bench", name: "Smith Machine Bench Press", muscle: "Chest / Triceps", category: "Chest", defaultReps: 10, defaultSets: 3, hasWeight: true, defaultWeight: 45, tip: "Bar path is fixed — focus on driving through the chest. Start light to learn the groove." },
+  { id: "gym-cable-fly",   name: "Cable Chest Fly",         muscle: "Chest",             category: "Chest", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 25, tip: "Cables set at chest height on the functional trainer. Sweep hands together in front of you, squeeze, slow return." },
 
   // BACK
   { id: "gym-lat-pulldown", name: "Lat Pulldown Machine",   muscle: "Lats / Biceps",     category: "Back", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 80, tip: "Wide grip, pull the bar to your upper chest, squeeze shoulder blades down and back." },
   { id: "gym-seated-row",   name: "Seated Row Machine",     muscle: "Back / Biceps",     category: "Back", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 50, tip: "Chest against the pad, pull handles to torso, squeeze shoulder blades together." },
   { id: "gym-assisted-pu",  name: "Assisted Pull-Up Machine", muscle: "Back / Biceps",   category: "Back", defaultReps: 8,  defaultSets: 3, hasWeight: true, defaultWeight: 60, tip: "Set assistance so the last rep or two is genuinely hard. Full hang to chin-over-bar." },
-  { id: "gym-back-ext",     name: "Back Extension",        muscle: "Lower Back / Glutes",category: "Back", defaultReps: 20, defaultSets: 3, hasWeight: false, tip: "Hips hinge over the pad, lower under control, extend back up to neutral — don't hyperextend at the top." },
+  { id: "gym-back-ext",     name: "Back Extension",        muscle: "Lower Back / Glutes",category: "Back", defaultReps: 20, defaultSets: 3, hasWeight: true, defaultWeight: 30, tip: "Hips hinge over the pad, lower under control, extend back up to neutral — don't hyperextend at the top. Add weight across your chest if the machine has a plate holder." },
 
   // SHOULDERS
   { id: "gym-shoulder-press", name: "Shoulder Press Machine", muscle: "Shoulders / Triceps", category: "Shoulders", defaultReps: 10, defaultSets: 2, hasWeight: true, defaultWeight: 30, tip: "Handles start at shoulder height, press straight up without arching the back." },
@@ -98,18 +103,23 @@ const GYM_LIBRARY = [
 
   // LEGS
   { id: "gym-leg-press",     name: "Leg Press Machine",     muscle: "Quads / Glutes",    category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 90, tip: "Feet shoulder-width on the platform. Don't lock your knees out at the top." },
+  { id: "gym-smith-squat",   name: "Smith Machine Squat",   muscle: "Quads / Glutes",    category: "Legs", defaultReps: 10, defaultSets: 3, hasWeight: true, defaultWeight: 45, tip: "Bar on your upper back, feet shoulder-width. Fixed bar path — focus on depth and control." },
   { id: "gym-leg-extension", name: "Leg Extension Machine", muscle: "Quads",             category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Pad rests just above the ankle. Extend fully, pause, lower slow." },
   { id: "gym-leg-curl",      name: "Leg Curl Machine",      muscle: "Hamstrings",        category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Curl heels toward glutes, squeeze, lower with control — don't let the weight drop." },
   { id: "gym-hip-abductor",  name: "Hip Abductor Machine",  muscle: "Hip Abductors / Glutes", category: "Legs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Push your knees outward against the pads. Controlled squeeze at the widest point." },
+  { id: "gym-hip-adductor",  name: "Hip Adductor Machine",  muscle: "Inner Thigh",       category: "Legs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Pull your knees inward against the pads. Controlled squeeze, slow release — same machine as the abductor, opposite direction." },
+  { id: "gym-multi-hip",     name: "Multi-Hip / Glute Kickback Machine", muscle: "Glutes", category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 30, tip: "Strap in, drive one leg back and up against the pad, squeeze the glute at the top, control the return." },
   { id: "gym-calf-machine",  name: "Seated Calf Raise Machine", muscle: "Calves",        category: "Legs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 60, tip: "Full stretch at the bottom, rise onto toes, pause at the top." },
 
   // ARMS
   { id: "gym-bicep-curl",    name: "Cable Bicep Curl",      muscle: "Biceps",            category: "Arms", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 20, tip: "Elbows pinned to your sides, curl the bar up, squeeze, lower slow." },
+  { id: "gym-preacher-curl", name: "Preacher Curl Machine", muscle: "Biceps",            category: "Arms", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 25, tip: "Arms rest on the pad, curl up without letting your elbows lift off. Isolates the bicep hard." },
   { id: "gym-tricep-push",   name: "Tricep Pushdown",       muscle: "Triceps",           category: "Arms", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 25, tip: "Elbows pinned to your sides, push the bar down to full extension, control the return." },
 
   // ABS
   { id: "gym-ab-crunch",     name: "Ab Crunch Machine",     muscle: "Abs",               category: "Abs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 30, tip: "Curl down and forward, exhale on the crunch, don't yank with your arms." },
   { id: "gym-torso-rotation",name: "Torso Rotation Machine",muscle: "Obliques",          category: "Abs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 20, tip: "Rotate under control through a comfortable range — don't force the twist." },
+  { id: "gym-captains-chair",name: "Captain's Chair Knee Raises", muscle: "Lower Abs / Hip Flexors", category: "Abs", defaultReps: 12, defaultSets: 3, hasWeight: false, tip: "Forearms on the pads, back against the support. Raise knees to hip height, lower with control — no swinging." },
 ];
 
 const GYM_DEFAULT_ACTIVE = [
