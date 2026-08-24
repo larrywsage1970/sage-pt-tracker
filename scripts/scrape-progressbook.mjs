@@ -35,7 +35,8 @@ if (!URL || !USERNAME || !PASSWORD) {
 }
 
 async function login(page) {
-  await page.goto(URL, { waitUntil: "domcontentloaded" });
+  const response = await page.goto(URL, { waitUntil: "domcontentloaded" });
+  console.log(`Loaded ${page.url()} (status ${response?.status()})`);
   await page.getByLabel("Username").fill(USERNAME);
   await page.getByLabel("Password").fill(PASSWORD);
   await Promise.all([
@@ -148,6 +149,14 @@ async function main() {
     await mkdir("data", { recursive: true });
     await writeFile("data/grades.json", JSON.stringify(grades, null, 2));
     console.log(`Wrote data/grades.json (${grades.courses.length} courses).`);
+  } catch (err) {
+    // Always capture what the page actually showed, even (especially) on
+    // failure — otherwise a CI failure gives no way to see what broke.
+    console.error(`Failed at ${page.url()}`);
+    await dumpDebugSnapshot(page).catch((snapshotErr) => {
+      console.error("Also failed to capture debug snapshot:", snapshotErr);
+    });
+    throw err;
   } finally {
     await browser.close();
   }
