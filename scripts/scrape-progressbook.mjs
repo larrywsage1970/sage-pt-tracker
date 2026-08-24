@@ -31,17 +31,17 @@
 import { chromium } from "playwright";
 import { writeFile, mkdir } from "node:fs/promises";
 
-const URL = process.env.PROGRESSBOOK_URL;
+const LOGIN_URL = process.env.PROGRESSBOOK_URL;
 const USERNAME = process.env.PROGRESSBOOK_USERNAME;
 const PASSWORD = process.env.PROGRESSBOOK_PASSWORD;
 
-if (!URL || !USERNAME || !PASSWORD) {
+if (!LOGIN_URL || !USERNAME || !PASSWORD) {
   console.error("Missing PROGRESSBOOK_URL / PROGRESSBOOK_USERNAME / PROGRESSBOOK_PASSWORD env vars.");
   process.exit(1);
 }
 
 async function login(page) {
-  const response = await page.goto(URL, { waitUntil: "domcontentloaded" });
+  const response = await page.goto(LOGIN_URL, { waitUntil: "domcontentloaded" });
   console.log(`Loaded ${page.url()} (status ${response?.status()})`);
 
   // PROGRESSBOOK_URL lands on the district's public home page (calendar etc.),
