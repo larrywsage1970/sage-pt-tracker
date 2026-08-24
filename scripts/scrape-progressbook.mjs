@@ -4,7 +4,10 @@
 // or log them.
 //
 // Required env vars:
-//   PROGRESSBOOK_URL       the stable ParentAccess entry point, e.g. https://pa.neonet.org/
+//   PROGRESSBOOK_URL       the district's ParentAccess home page, e.g.
+//                          https://pa.neonet.org/district/st — this lands on a public
+//                          district page (calendar etc.) with a "Sign In" button; clicking
+//                          it is what kicks off a fresh SSO handshake to the real login form.
 //                          NOT a one-time ?signin=... link copied from a browser session —
 //                          that token is bound to the session that minted it and fails with
 //                          a generic SSO error when hit cold from a fresh browser context.
@@ -40,6 +43,18 @@ if (!URL || !USERNAME || !PASSWORD) {
 async function login(page) {
   const response = await page.goto(URL, { waitUntil: "domcontentloaded" });
   console.log(`Loaded ${page.url()} (status ${response?.status()})`);
+
+  // PROGRESSBOOK_URL lands on the district's public home page (calendar etc.),
+  // not a login form. Clicking its "Sign In" button is what kicks off a
+  // fresh SSO handshake with the correct app context — hitting the auth
+  // gateway directly without this step is what caused earlier failures.
+  const districtSignIn = page.getByRole("button", { name: "Sign In" }).or(page.getByRole("link", { name: "Sign In" }));
+  await Promise.all([
+    page.waitForLoadState("domcontentloaded"),
+    districtSignIn.first().click(),
+  ]);
+  console.log(`After district Sign In click, at ${page.url()}`);
+
   await page.getByLabel("Username").fill(USERNAME);
   await page.getByLabel("Password").fill(PASSWORD);
   await Promise.all([
