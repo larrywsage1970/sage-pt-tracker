@@ -42,7 +42,7 @@ scraper last wrote.
 
 **One-time setup:**
 1. In the repo's GitHub settings → **Secrets and variables → Actions**, add:
-   - `PROGRESSBOOK_URL` — the stable ParentAccess entry point for your district, e.g. `https://pa.neonet.org/`. **Don't** use a one-time `?signin=...` link copied from a browser session/autofill — that token is bound to the session that created it and fails with a generic SSO error ("There is an error determining which application you are signing into") when hit cold from a fresh browser.
+   - `PROGRESSBOOK_URL` — your district's ParentAccess home page, e.g. `https://pa.neonet.org/district/st`. This lands on a public district page (calendar etc.) with a "Sign In" button; the scraper clicks it to kick off a fresh SSO handshake with the correct app context — the bare `https://pa.neonet.org/` root shows a district picker instead, and won't work. **Don't** use a one-time `?signin=...` link copied from a browser session/autofill either — that token is bound to the session that created it and fails with a generic SSO error ("There is an error determining which application you are signing into") when hit cold from a fresh browser.
    - `PROGRESSBOOK_USERNAME`
    - `PROGRESSBOOK_PASSWORD`
 
