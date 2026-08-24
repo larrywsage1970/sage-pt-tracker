@@ -42,7 +42,7 @@ scraper last wrote.
 
 **One-time setup:**
 1. In the repo's GitHub settings → **Secrets and variables → Actions**, add:
-   - `PROGRESSBOOK_URL` — the login URL your district's ProgressBook uses (e.g. `https://ca.neonet.org/auth/login?signin=...`)
+   - `PROGRESSBOOK_URL` — the stable ParentAccess entry point for your district, e.g. `https://pa.neonet.org/`. **Don't** use a one-time `?signin=...` link copied from a browser session/autofill — that token is bound to the session that created it and fails with a generic SSO error ("There is an error determining which application you are signing into") when hit cold from a fresh browser.
    - `PROGRESSBOOK_USERNAME`
    - `PROGRESSBOOK_PASSWORD`
 

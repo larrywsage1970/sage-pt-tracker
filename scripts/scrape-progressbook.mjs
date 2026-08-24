@@ -4,7 +4,10 @@
 // or log them.
 //
 // Required env vars:
-//   PROGRESSBOOK_URL       the login page, e.g. https://ca.neonet.org/auth/login?signin=...
+//   PROGRESSBOOK_URL       the stable ParentAccess entry point, e.g. https://pa.neonet.org/
+//                          NOT a one-time ?signin=... link copied from a browser session —
+//                          that token is bound to the session that minted it and fails with
+//                          a generic SSO error when hit cold from a fresh browser context.
 //   PROGRESSBOOK_USERNAME
 //   PROGRESSBOOK_PASSWORD
 //
