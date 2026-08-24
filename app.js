@@ -69,46 +69,62 @@ const DESK_DEFAULT_ACTIVE = [
 const DESK_CATEGORY_ORDER = ["Chest","Shoulders","Pull","Abs","Legs","Balance"];
 
 // ── GYM LIBRARY ───────────────────────────────────────────────────────────────
-// Standard Planet Fitness machine circuit. Warm up with a mile on the treadmill.
-// Exact machine names/layout vary by location — swap in whatever's equivalent.
+// Standard Planet Fitness machine circuit. Warm up with a mile on the treadmill
+// (or the bike/elliptical). Exact machine names/layout vary by location — swap
+// in whatever's equivalent.
+// Every strength machine carries Sets + Reps + Weight (weight adjustable per
+// exercise in the Library, starting from defaultWeight below). Two kinds of
+// exception, both deliberate: `cardio: true` items (treadmill/bike/elliptical)
+// keep the simpler distance-or-duration display — sets/weight don't apply to
+// a warmup. `hasWeight: false` (currently just Captain's Chair) marks a
+// bodyweight-only apparatus with no weight stack to adjust.
 const GYM_LIBRARY = [
   // WARM-UP
-  { id: "gym-treadmill", name: "Treadmill Warm-Up",         muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 1, unit: "mile", tip: "Moderate pace, slight incline (1–2%). Gets blood flowing before lifting — don't skip it." },
+  { id: "gym-treadmill", name: "Treadmill Warm-Up",         muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 1, unit: "mile", cardio: true, tip: "Moderate pace, slight incline (1–2%). Gets blood flowing before lifting — don't skip it." },
+  { id: "gym-bike",      name: "Stationary Bike Warm-Up",   muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 10, unit: "min", cardio: true, tip: "Easy-moderate resistance, steady cadence. A lower-impact alternative to the treadmill." },
+  { id: "gym-elliptical",name: "Elliptical Warm-Up",        muscle: "Cardio / Warm-Up",  category: "Warmup", defaultReps: 10, unit: "min", cardio: true, tip: "Full-body, joint-friendly warm-up. Use the arm handles too, not just the legs." },
 
   // CHEST
-  { id: "gym-chest-press", name: "Chest Press Machine",     muscle: "Chest / Triceps",   category: "Chest", defaultReps: 12, tip: "Adjust seat so handles line up with mid-chest. Press out fully, control the return." },
-  { id: "gym-pec-deck",    name: "Pec Deck / Chest Fly Machine", muscle: "Chest",        category: "Chest", defaultReps: 12, tip: "Elbows slightly bent, squeeze pads together in front of chest. Slow negative." },
-  { id: "gym-smith-bench", name: "Smith Machine Bench Press", muscle: "Chest / Triceps", category: "Chest", defaultReps: 10, tip: "Bar path is fixed — focus on driving through the chest. Start light to learn the groove." },
+  { id: "gym-chest-press", name: "Chest Press Machine",     muscle: "Chest / Triceps",   category: "Chest", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 50, tip: "Adjust seat so handles line up with mid-chest. Press out fully, control the return." },
+  { id: "gym-pec-deck",    name: "Pec Deck / Chest Fly Machine", muscle: "Chest",        category: "Chest", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Elbows slightly bent, squeeze pads together in front of chest. Slow negative." },
+  { id: "gym-smith-bench", name: "Smith Machine Bench Press", muscle: "Chest / Triceps", category: "Chest", defaultReps: 10, defaultSets: 3, hasWeight: true, defaultWeight: 45, tip: "Bar path is fixed — focus on driving through the chest. Start light to learn the groove." },
+  { id: "gym-cable-fly",   name: "Cable Chest Fly",         muscle: "Chest",             category: "Chest", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 25, tip: "Cables set at chest height on the functional trainer. Sweep hands together in front of you, squeeze, slow return." },
 
   // BACK
-  { id: "gym-lat-pulldown", name: "Lat Pulldown Machine",   muscle: "Lats / Biceps",     category: "Back", defaultReps: 12, tip: "Wide grip, pull the bar to your upper chest, squeeze shoulder blades down and back." },
-  { id: "gym-seated-row",   name: "Seated Row Machine",     muscle: "Back / Biceps",     category: "Back", defaultReps: 12, tip: "Chest against the pad, pull handles to torso, squeeze shoulder blades together." },
-  { id: "gym-assisted-pu",  name: "Assisted Pull-Up Machine", muscle: "Back / Biceps",   category: "Back", defaultReps: 8,  tip: "Set assistance so the last rep or two is genuinely hard. Full hang to chin-over-bar." },
+  { id: "gym-lat-pulldown", name: "Lat Pulldown Machine",   muscle: "Lats / Biceps",     category: "Back", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 80, tip: "Wide grip, pull the bar to your upper chest, squeeze shoulder blades down and back." },
+  { id: "gym-seated-row",   name: "Seated Row Machine",     muscle: "Back / Biceps",     category: "Back", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 50, tip: "Chest against the pad, pull handles to torso, squeeze shoulder blades together." },
+  { id: "gym-assisted-pu",  name: "Assisted Pull-Up Machine", muscle: "Back / Biceps",   category: "Back", defaultReps: 8,  defaultSets: 3, hasWeight: true, defaultWeight: 60, tip: "Set assistance so the last rep or two is genuinely hard. Full hang to chin-over-bar." },
+  { id: "gym-back-ext",     name: "Back Extension",        muscle: "Lower Back / Glutes",category: "Back", defaultReps: 20, defaultSets: 3, hasWeight: true, defaultWeight: 30, tip: "Hips hinge over the pad, lower under control, extend back up to neutral — don't hyperextend at the top. Add weight across your chest if the machine has a plate holder." },
 
   // SHOULDERS
-  { id: "gym-shoulder-press", name: "Shoulder Press Machine", muscle: "Shoulders / Triceps", category: "Shoulders", defaultReps: 12, tip: "Handles start at shoulder height, press straight up without arching the back." },
-  { id: "gym-rear-delt",      name: "Rear Delt / Reverse Fly Machine", muscle: "Rear Delts / Upper Back", category: "Shoulders", defaultReps: 15, tip: "Face into the pad, sweep arms out and back. Light weight, high control." },
-  { id: "gym-cable-lateral",  name: "Cable Lateral Raise",  muscle: "Side Delts",        category: "Shoulders", defaultReps: 12, tip: "Cable at the lowest pin, raise your arm out to the side to shoulder height. Slow on the way down." },
+  { id: "gym-shoulder-press", name: "Shoulder Press Machine", muscle: "Shoulders / Triceps", category: "Shoulders", defaultReps: 10, defaultSets: 2, hasWeight: true, defaultWeight: 30, tip: "Handles start at shoulder height, press straight up without arching the back." },
+  { id: "gym-rear-delt",      name: "Rear Delt / Reverse Fly Machine", muscle: "Rear Delts / Upper Back", category: "Shoulders", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 20, tip: "Face into the pad, sweep arms out and back. Light weight, high control." },
+  { id: "gym-cable-lateral",  name: "Cable Lateral Raise",  muscle: "Side Delts",        category: "Shoulders", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 10, tip: "Cable at the lowest pin, raise your arm out to the side to shoulder height. Slow on the way down." },
 
   // LEGS
-  { id: "gym-leg-press",     name: "Leg Press Machine",     muscle: "Quads / Glutes",    category: "Legs", defaultReps: 12, tip: "Feet shoulder-width on the platform. Don't lock your knees out at the top." },
-  { id: "gym-leg-extension", name: "Leg Extension Machine", muscle: "Quads",             category: "Legs", defaultReps: 12, tip: "Pad rests just above the ankle. Extend fully, pause, lower slow." },
-  { id: "gym-leg-curl",      name: "Leg Curl Machine",      muscle: "Hamstrings",        category: "Legs", defaultReps: 12, tip: "Curl heels toward glutes, squeeze, lower with control — don't let the weight drop." },
-  { id: "gym-hip-abductor",  name: "Hip Abductor Machine",  muscle: "Hip Abductors / Glutes", category: "Legs", defaultReps: 15, tip: "Push your knees outward against the pads. Controlled squeeze at the widest point." },
-  { id: "gym-calf-machine",  name: "Seated Calf Raise Machine", muscle: "Calves",        category: "Legs", defaultReps: 15, tip: "Full stretch at the bottom, rise onto toes, pause at the top." },
+  { id: "gym-leg-press",     name: "Leg Press Machine",     muscle: "Quads / Glutes",    category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 90, tip: "Feet shoulder-width on the platform. Don't lock your knees out at the top." },
+  { id: "gym-smith-squat",   name: "Smith Machine Squat",   muscle: "Quads / Glutes",    category: "Legs", defaultReps: 10, defaultSets: 3, hasWeight: true, defaultWeight: 45, tip: "Bar on your upper back, feet shoulder-width. Fixed bar path — focus on depth and control." },
+  { id: "gym-leg-extension", name: "Leg Extension Machine", muscle: "Quads",             category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Pad rests just above the ankle. Extend fully, pause, lower slow." },
+  { id: "gym-leg-curl",      name: "Leg Curl Machine",      muscle: "Hamstrings",        category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Curl heels toward glutes, squeeze, lower with control — don't let the weight drop." },
+  { id: "gym-hip-abductor",  name: "Hip Abductor Machine",  muscle: "Hip Abductors / Glutes", category: "Legs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Push your knees outward against the pads. Controlled squeeze at the widest point." },
+  { id: "gym-hip-adductor",  name: "Hip Adductor Machine",  muscle: "Inner Thigh",       category: "Legs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 40, tip: "Pull your knees inward against the pads. Controlled squeeze, slow release — same machine as the abductor, opposite direction." },
+  { id: "gym-multi-hip",     name: "Multi-Hip / Glute Kickback Machine", muscle: "Glutes", category: "Legs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 30, tip: "Strap in, drive one leg back and up against the pad, squeeze the glute at the top, control the return." },
+  { id: "gym-calf-machine",  name: "Seated Calf Raise Machine", muscle: "Calves",        category: "Legs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 60, tip: "Full stretch at the bottom, rise onto toes, pause at the top." },
 
   // ARMS
-  { id: "gym-bicep-curl",    name: "Cable Bicep Curl",      muscle: "Biceps",            category: "Arms", defaultReps: 12, tip: "Elbows pinned to your sides, curl the bar up, squeeze, lower slow." },
-  { id: "gym-tricep-push",   name: "Tricep Pushdown",       muscle: "Triceps",           category: "Arms", defaultReps: 12, tip: "Elbows pinned to your sides, push the bar down to full extension, control the return." },
+  { id: "gym-bicep-curl",    name: "Cable Bicep Curl",      muscle: "Biceps",            category: "Arms", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 20, tip: "Elbows pinned to your sides, curl the bar up, squeeze, lower slow." },
+  { id: "gym-preacher-curl", name: "Preacher Curl Machine", muscle: "Biceps",            category: "Arms", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 25, tip: "Arms rest on the pad, curl up without letting your elbows lift off. Isolates the bicep hard." },
+  { id: "gym-tricep-push",   name: "Tricep Pushdown",       muscle: "Triceps",           category: "Arms", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 25, tip: "Elbows pinned to your sides, push the bar down to full extension, control the return." },
 
   // ABS
-  { id: "gym-ab-crunch",     name: "Ab Crunch Machine",     muscle: "Abs",               category: "Abs", defaultReps: 15, tip: "Curl down and forward, exhale on the crunch, don't yank with your arms." },
-  { id: "gym-torso-rotation",name: "Torso Rotation Machine",muscle: "Obliques",          category: "Abs", defaultReps: 12, tip: "Rotate under control through a comfortable range — don't force the twist." },
+  { id: "gym-ab-crunch",     name: "Ab Crunch Machine",     muscle: "Abs",               category: "Abs", defaultReps: 15, defaultSets: 3, hasWeight: true, defaultWeight: 30, tip: "Curl down and forward, exhale on the crunch, don't yank with your arms." },
+  { id: "gym-torso-rotation",name: "Torso Rotation Machine",muscle: "Obliques",          category: "Abs", defaultReps: 12, defaultSets: 3, hasWeight: true, defaultWeight: 20, tip: "Rotate under control through a comfortable range — don't force the twist." },
+  { id: "gym-captains-chair",name: "Captain's Chair Knee Raises", muscle: "Lower Abs / Hip Flexors", category: "Abs", defaultReps: 12, defaultSets: 3, hasWeight: false, tip: "Forearms on the pads, back against the support. Raise knees to hip height, lower with control — no swinging." },
 ];
 
 const GYM_DEFAULT_ACTIVE = [
   "gym-treadmill",
-  "gym-chest-press","gym-lat-pulldown","gym-shoulder-press",
+  "gym-chest-press","gym-lat-pulldown","gym-shoulder-press","gym-back-ext",
   "gym-leg-press","gym-leg-extension","gym-leg-curl","gym-calf-machine",
   "gym-bicep-curl","gym-tricep-push",
   "gym-ab-crunch","gym-seated-row"
@@ -140,7 +156,7 @@ const CATEGORY_COLOR = {
   Warmup:    "#8a8a7a",
 };
 
-const BACKUP_VERSION = 3;
+const BACKUP_VERSION = 4;
 
 // ── STORAGE ──────────────────────────────────────────────────────────────────
 const S = {
@@ -186,6 +202,14 @@ const ID_MIGRATIONS = {
   "chair-squat":  { to: "desk-squat",    oldDefault: { reps: 15, active: true } },
 };
 
+// One-time explicit value updates from the Aug 21, 2026 change request — only
+// applied if the saved value still matches the OLD default (hasn't been
+// manually customized since), same guard as the ID migrations above.
+const VALUE_MIGRATIONS = [
+  { id: "gym-shoulder-press", field: "reps", oldDefault: 12, newDefault: 10 },
+  { id: "gym-lat-pulldown",   field: "reps", oldDefault: 12, newDefault: 15 },
+];
+
 // ── MAIN APP ─────────────────────────────────────────────────────────────────
 function SagePT() {
   const [tab, setTab] = useState("desk");
@@ -198,12 +222,24 @@ function SagePT() {
       const wasChanged = oldVal.active !== oldDefault.active || oldVal.reps !== oldDefault.reps;
       if (wasChanged) saved[to] = oldVal;
     });
-    // Merge onto current LIBRARY ids: keeps any saved choice, falls back to
-    // the default for ids that are new or were never saved. An id missing
-    // from LIBRARY entirely (removed exercise) is simply never looked up.
+    VALUE_MIGRATIONS.forEach(({ id, field, oldDefault, newDefault }) => {
+      const s = saved[id];
+      if (s && s[field] === oldDefault) s[field] = newDefault;
+    });
+    // Merge per-field onto current LIBRARY ids: keeps any saved choice for a
+    // field that already exists, backfills defaults for fields that are new
+    // (sets/weight on an exercise saved before this update) or never saved.
+    // An id missing from LIBRARY entirely (removed exercise) is never looked up.
     const c = {};
     LIBRARY.forEach(ex => {
-      c[ex.id] = saved[ex.id] ?? { reps: ex.defaultReps, active: DEFAULT_ACTIVE.includes(ex.id) };
+      const s = saved[ex.id] || {};
+      const entry = {
+        reps: s.reps ?? ex.defaultReps,
+        active: s.active ?? DEFAULT_ACTIVE.includes(ex.id),
+      };
+      if (ex.defaultSets != null) entry.sets = s.sets ?? ex.defaultSets;
+      if (ex.hasWeight) entry.weight = s.weight ?? ex.defaultWeight;
+      c[ex.id] = entry;
     });
     return c;
   });
@@ -213,6 +249,7 @@ function SagePT() {
     gym: S.get("spt_checked_gym_" + todayKey(), {}),
   }));
   const [log, setLog] = useState(() => normalizeLog(S.get("spt_log", [])));
+  const [changeLog, setChangeLog] = useState(() => S.get("spt_changelog", []));
 
   useEffect(() => { S.set("spt_config", config); }, [config]);
   useEffect(() => { S.set("spt_checked_desk_" + todayKey(), checked.desk); }, [checked.desk]);
@@ -266,15 +303,40 @@ function SagePT() {
 
   const toggleCheck = (section, id) => setChecked(p => ({ ...p, [section]: { ...p[section], [id]: !p[section][id] } }));
 
-  const updateReps = (id, delta) => {
-    setConfig(p => ({ ...p, [id]: { ...p[id], reps: Math.max(1, (p[id]?.reps ?? 10) + delta) } }));
+  const FIELD_LABEL = { reps: "reps", sets: "sets", weight: "weight" };
+  const fmtFieldValue = (field, v) => field === "weight" ? `${v}#` : `${v}`;
+
+  // Every Sets/Reps/Weight edit made in the Library gets a progression-history
+  // entry — that's the whole point of tracking them (Aug 21, 2026 request).
+  const logFieldChange = (id, field, from, to) => {
+    const ex = LIBRARY.find(e => e.id === id);
+    if (!ex) return;
+    const entry = {
+      id, field, from, to,
+      summary: `${ex.name}: ${FIELD_LABEL[field]} ${fmtFieldValue(field, from)} → ${fmtFieldValue(field, to)}`,
+      timestamp: Date.now(),
+      dateLabel: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
+    };
+    setChangeLog(prev => {
+      const next = [entry, ...prev];
+      S.set("spt_changelog", next);
+      return next;
+    });
+  };
+
+  const updateField = (id, field, delta, min) => {
+    const cur = config[id]?.[field] ?? 0;
+    const next = Math.max(min, cur + delta);
+    if (next === cur) return;
+    setConfig(p => ({ ...p, [id]: { ...p[id], [field]: next } }));
+    logFieldChange(id, field, cur, next);
   };
   const toggleActive = (id) => {
     setConfig(p => ({ ...p, [id]: { ...p[id], active: !p[id]?.active } }));
   };
 
   const exportData = () => {
-    const payload = { version: BACKUP_VERSION, exportedAt: new Date().toISOString(), config, log };
+    const payload = { version: BACKUP_VERSION, exportedAt: new Date().toISOString(), config, log, changeLog };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -291,6 +353,7 @@ function SagePT() {
         const data = JSON.parse(reader.result);
         if (data.config) { setConfig(data.config); S.set("spt_config", data.config); }
         if (Array.isArray(data.log)) { const normalized = normalizeLog(data.log); setLog(normalized); S.set("spt_log", normalized); }
+        if (Array.isArray(data.changeLog)) { setChangeLog(data.changeLog); S.set("spt_changelog", data.changeLog); }
         alert("Backup restored.");
       } catch {
         alert("Couldn't read that file — make sure it's a Sage PT backup JSON.");
@@ -336,8 +399,8 @@ function SagePT() {
           todayLogged=${log.find(e => e.dateKey === todayKey() && e.section === tab)}
         />`}
         ${tab === "grades" && html`<${GradesTab} />`}
-        ${tab === "library" && html`<${LibraryTab} config=${config} onToggleActive=${toggleActive} onUpdateReps=${updateReps} />`}
-        ${tab === "log" && html`<${LogTab} log=${log} />`}
+        ${tab === "library" && html`<${LibraryTab} config=${config} onToggleActive=${toggleActive} onUpdateField=${updateField} />`}
+        ${tab === "log" && html`<${LogTab} log=${log} changeLog=${changeLog} />`}
         ${tab === "more" && html`<${MoreTab} onExport=${exportData} onImport=${importData} onResetToday=${resetToday} />`}
       </div>
     </div>
@@ -373,8 +436,10 @@ function SectionTab({ section, exercises, config, checked, onCheck, todayLogged 
             ${cat.toUpperCase()}
           </div>
           ${items.map(ex => {
-            const reps = config[ex.id]?.reps ?? ex.defaultReps;
+            const cfg = config[ex.id] || {};
+            const reps = cfg.reps ?? ex.defaultReps;
             const done = !!checked[ex.id];
+            const isStrength = ex.defaultSets != null;
             return html`
               <div key=${ex.id} style=${{...styles.exCard, ...(done ? styles.exCardDone : {}), borderLeftColor: done ? CATEGORY_COLOR[ex.category] : "#333"}}>
                 <button style=${{...styles.checkBtn, ...(done ? styles.checkBtnDone : {})}} onClick=${() => onCheck(ex.id)}>
@@ -385,10 +450,18 @@ function SectionTab({ section, exercises, config, checked, onCheck, todayLogged 
                   <div style=${styles.exMuscle}>${ex.muscle}</div>
                   <div style=${styles.exTip}>${ex.tip}</div>
                 </div>
-                <div style=${styles.repBadge}>
-                  <div style=${styles.repNum}>${reps}</div>
-                  <div style=${styles.repUnit}>${(ex.unit || "reps").toUpperCase()}</div>
-                </div>
+                ${isStrength ? html`
+                  <div style=${styles.repBadge}>
+                    <div style=${{...styles.repNum, fontSize:"1.15rem"}}>${cfg.sets ?? ex.defaultSets}×${reps}</div>
+                    <div style=${styles.repUnit}>SETS×REPS</div>
+                    ${ex.hasWeight && html`<div style=${styles.weightBadge}>${cfg.weight ?? ex.defaultWeight} LBS</div>`}
+                  </div>
+                ` : html`
+                  <div style=${styles.repBadge}>
+                    <div style=${styles.repNum}>${reps}</div>
+                    <div style=${styles.repUnit}>${(ex.unit || "reps").toUpperCase()}</div>
+                  </div>
+                `}
               </div>
             `;
           })}
@@ -400,8 +473,22 @@ function SectionTab({ section, exercises, config, checked, onCheck, todayLogged 
   `;
 }
 
+// ── NUMBER CONTROL (Sets / Reps / Weight counter) ────────────────────────────
+function NumberControl({ label, value, onDec, onInc }) {
+  return html`
+    <div style=${styles.numControl}>
+      <div style=${styles.numLabel}>${label}</div>
+      <div style=${styles.numRow}>
+        <button style=${styles.repBtn} onClick=${onDec}>−</button>
+        <div style=${styles.repVal}>${value}</div>
+        <button style=${styles.repBtn} onClick=${onInc}>+</button>
+      </div>
+    </div>
+  `;
+}
+
 // ── LIBRARY TAB ───────────────────────────────────────────────────────────────
-function LibraryTab({ config, onToggleActive, onUpdateReps }) {
+function LibraryTab({ config, onToggleActive, onUpdateField }) {
   const [section, setSection] = useState("desk");
   const [filter, setFilter] = useState("All");
   const cats = ["All", ...SECTIONS[section].categoryOrder];
@@ -427,29 +514,34 @@ function LibraryTab({ config, onToggleActive, onUpdateReps }) {
       </div>
 
       <div style=${styles.infoBox}>
-        Toggle exercises on/off for your ${SECTIONS[section].label} routine. Adjust reps with +/−. Changes save instantly.
+        Toggle exercises on/off for your ${SECTIONS[section].label} routine. Adjust with +/−. Changes save instantly${section === "gym" ? " and sets/reps/weight edits are tracked in Log → Progression" : ""}.
       </div>
 
       ${visible.map(ex => {
-        const cfg = config[ex.id] ?? { reps: ex.defaultReps, active: false };
+        const cfg = config[ex.id] ?? { reps: ex.defaultReps, active: false, sets: ex.defaultSets, weight: ex.defaultWeight };
+        const hasSets = ex.defaultSets != null;
+        const hasWeight = !!ex.hasWeight;
         return html`
           <div key=${ex.id} style=${{...styles.libCard, ...(cfg.active ? styles.libCardActive : {})}}>
-            <div style=${styles.libLeft}>
-              <div style=${{...styles.catDot, background: CATEGORY_COLOR[ex.category]}} />
-              <div>
-                <div style=${styles.libName}>${ex.name}</div>
-                <div style=${styles.libMuscle}>${ex.muscle} · ${ex.category}</div>
-              </div>
-            </div>
-            <div style=${styles.libRight}>
-              <div style=${styles.repControl}>
-                <button style=${styles.repBtn} onClick=${() => onUpdateReps(ex.id, -1)}>−</button>
-                <div style=${styles.repVal}>${cfg.reps}</div>
-                <button style=${styles.repBtn} onClick=${() => onUpdateReps(ex.id, 1)}>+</button>
+            <div style=${styles.libTopRow}>
+              <div style=${styles.libLeft}>
+                <div style=${{...styles.catDot, background: CATEGORY_COLOR[ex.category]}} />
+                <div>
+                  <div style=${styles.libName}>${ex.name}</div>
+                  <div style=${styles.libMuscle}>${ex.muscle} · ${ex.category}</div>
+                </div>
               </div>
               <button style=${{...styles.toggleBtn, ...(cfg.active ? styles.toggleBtnOn : {})}} onClick=${() => onToggleActive(ex.id)}>
                 ${cfg.active ? "ON" : "OFF"}
               </button>
+            </div>
+            <div style=${styles.numRowWrap}>
+              ${hasSets && html`<${NumberControl} label="SETS" value=${cfg.sets ?? ex.defaultSets}
+                onDec=${() => onUpdateField(ex.id, "sets", -1, 1)} onInc=${() => onUpdateField(ex.id, "sets", 1, 1)} />`}
+              <${NumberControl} label=${(ex.unit || "reps").toUpperCase()} value=${cfg.reps}
+                onDec=${() => onUpdateField(ex.id, "reps", -1, 1)} onInc=${() => onUpdateField(ex.id, "reps", 1, 1)} />
+              ${hasWeight && html`<${NumberControl} label="LBS" value=${cfg.weight ?? ex.defaultWeight}
+                onDec=${() => onUpdateField(ex.id, "weight", -5, 0)} onInc=${() => onUpdateField(ex.id, "weight", 5, 0)} />`}
             </div>
           </div>
         `;
@@ -460,7 +552,23 @@ function LibraryTab({ config, onToggleActive, onUpdateReps }) {
 }
 
 // ── LOG TAB ───────────────────────────────────────────────────────────────────
-function LogTab({ log }) {
+function LogTab({ log, changeLog }) {
+  const [view, setView] = useState("sessions");
+  return html`
+    <div>
+      <div style=${styles.filterRow}>
+        ${["sessions","progression"].map(v => html`
+          <button key=${v} style=${{...styles.pill, ...styles.sectionPill, ...(view===v ? styles.pillActive : {})}} onClick=${() => setView(v)}>
+            ${v.toUpperCase()}
+          </button>
+        `)}
+      </div>
+      ${view === "sessions" ? html`<${SessionsLog} log=${log} />` : html`<${ProgressionLog} changeLog=${changeLog} />`}
+    </div>
+  `;
+}
+
+function SessionsLog({ log }) {
   if (!log.length) return html`<div style=${styles.empty}>No workouts logged yet.<br />Check off an exercise on the Desk or Gym tab to start today's entry.</div>`;
 
   return html`
@@ -538,6 +646,26 @@ function GradesTab() {
   `;
 }
 
+// Progression history — one entry per Sets/Reps/Weight edit made in the
+// Library, so strength progress over time is visible, not just daily completion.
+function ProgressionLog({ changeLog }) {
+  if (!changeLog.length) return html`<div style=${styles.empty}>No changes tracked yet.<br />Adjust sets, reps, or weight for a Gym exercise in the Library to start a progression history.</div>`;
+
+  return html`
+    <div>
+      ${changeLog.map((c, i) => html`
+        <div key=${i} style=${styles.logEntry}>
+          <div>
+            <div style=${styles.logDate}>${c.dateLabel}</div>
+            <div style=${styles.logDetail}>${c.summary}</div>
+          </div>
+        </div>
+      `)}
+      <div style=${{height: 40}} />
+    </div>
+  `;
+}
+
 // ── MORE TAB ──────────────────────────────────────────────────────────────────
 function MoreTab({ onExport, onImport, onResetToday }) {
   const [showInstall] = useState(!isStandalone() && isIOS());
@@ -553,36 +681,44 @@ function MoreTab({ onExport, onImport, onResetToday }) {
 
       <div style=${{...styles.phaseLabel, borderColor:"#9aab8a", color:"#9aab8a"}}>DATA</div>
       <div style=${styles.libCard}>
-        <div style=${{flex:1}}>
-          <div style=${styles.libName}>Backup your data</div>
-          <div style=${styles.libMuscle}>Download your log & settings as a JSON file</div>
+        <div style=${styles.libTopRow}>
+          <div style=${{flex:1}}>
+            <div style=${styles.libName}>Backup your data</div>
+            <div style=${styles.libMuscle}>Download your log & settings as a JSON file</div>
+          </div>
+          <button style=${{...styles.toggleBtn, ...styles.toggleBtnOn, minWidth: 70}} onClick=${onExport}>EXPORT</button>
         </div>
-        <button style=${{...styles.toggleBtn, ...styles.toggleBtnOn, minWidth: 70}} onClick=${onExport}>EXPORT</button>
       </div>
       <div style=${styles.libCard}>
-        <div style=${{flex:1}}>
-          <div style=${styles.libName}>Restore backup</div>
-          <div style=${styles.libMuscle}>Load a previously exported JSON file</div>
+        <div style=${styles.libTopRow}>
+          <div style=${{flex:1}}>
+            <div style=${styles.libName}>Restore backup</div>
+            <div style=${styles.libMuscle}>Load a previously exported JSON file</div>
+          </div>
+          <button style=${{...styles.toggleBtn, minWidth: 70}} onClick=${() => fileInput?.click()}>IMPORT</button>
+          <input ref=${setFileInput} type="file" accept="application/json" style=${{display:"none"}}
+            onChange=${(e) => { if (e.target.files[0]) onImport(e.target.files[0]); e.target.value = ""; }} />
         </div>
-        <button style=${{...styles.toggleBtn, minWidth: 70}} onClick=${() => fileInput?.click()}>IMPORT</button>
-        <input ref=${setFileInput} type="file" accept="application/json" style=${{display:"none"}}
-          onChange=${(e) => { if (e.target.files[0]) onImport(e.target.files[0]); e.target.value = ""; }} />
       </div>
 
       <div style=${{...styles.phaseLabel, borderColor:"#c05a5a", color:"#c05a5a", marginTop: 24}}>DANGER ZONE</div>
       <div style=${styles.libCard}>
-        <div style=${{flex:1}}>
-          <div style=${styles.libName}>Reset today's Desk checkmarks</div>
-          <div style=${styles.libMuscle}>Doesn't affect past log entries</div>
+        <div style=${styles.libTopRow}>
+          <div style=${{flex:1}}>
+            <div style=${styles.libName}>Reset today's Desk checkmarks</div>
+            <div style=${styles.libMuscle}>Doesn't affect past log entries</div>
+          </div>
+          <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${() => onResetToday("desk")}>RESET</button>
         </div>
-        <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${() => onResetToday("desk")}>RESET</button>
       </div>
       <div style=${styles.libCard}>
-        <div style=${{flex:1}}>
-          <div style=${styles.libName}>Reset today's Gym checkmarks</div>
-          <div style=${styles.libMuscle}>Doesn't affect past log entries</div>
+        <div style=${styles.libTopRow}>
+          <div style=${{flex:1}}>
+            <div style=${styles.libName}>Reset today's Gym checkmarks</div>
+            <div style=${styles.libMuscle}>Doesn't affect past log entries</div>
+          </div>
+          <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${() => onResetToday("gym")}>RESET</button>
         </div>
-        <button style=${{...styles.toggleBtn, borderColor:"#3a2020", color:"#c05a5a", minWidth: 70}} onClick=${() => onResetToday("gym")}>RESET</button>
       </div>
 
       <div style=${{height: 40}} />
@@ -639,20 +775,24 @@ const styles = {
   repBadge: { textAlign:"center", minWidth:36 },
   repNum: { fontSize:"1.4rem", fontWeight:800, color:"#c8b89a", lineHeight:1 },
   repUnit: { fontSize:8, color:"#8a8a8a", letterSpacing:"0.12em" },
+  weightBadge: { fontSize:10, fontWeight:700, color:"#8fa068", marginTop:2 },
 
   filterRow: { display:"flex", gap:6, padding:"14px 0 10px", flexWrap:"wrap" },
   pill: { padding:"5px 10px", background:"#1a1c18", border:"1px solid #333", color:"#999", fontSize:10, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2 },
   sectionPill: { flex:1, textAlign:"center", fontWeight:700 },
   pillActive: { background:"#4a5240", borderColor:"#4a5240", color:"#e8dcc8" },
 
-  libCard: { background:"#161810", border:"1px solid #222", borderRadius:2, marginBottom:8, padding:"12px", display:"flex", justifyContent:"space-between", alignItems:"center", opacity:0.6, gap: 10 },
+  libCard: { background:"#161810", border:"1px solid #222", borderRadius:2, marginBottom:8, padding:"12px", opacity:0.6 },
   libCardActive: { opacity:1, borderColor:"#3a4a30" },
+  libTopRow: { display:"flex", justifyContent:"space-between", alignItems:"center", gap:10 },
   libLeft: { display:"flex", alignItems:"center", gap:10, flex:1 },
   catDot: { width:8, height:8, borderRadius:"50%", flexShrink:0 },
   libName: { fontSize:13, fontWeight:600, color:"#e8dcc8", marginBottom:2 },
   libMuscle: { fontSize:10, color:"#9aab8a", letterSpacing:"0.08em" },
-  libRight: { display:"flex", alignItems:"center", gap:10 },
-  repControl: { display:"flex", alignItems:"center", gap:6 },
+  numRowWrap: { display:"flex", gap:14, marginTop:10, paddingTop:10, borderTop:"1px solid #222", flexWrap:"wrap" },
+  numControl: { display:"flex", flexDirection:"column", alignItems:"center", gap:4 },
+  numLabel: { fontSize:8, color:"#8a8a8a", letterSpacing:"0.1em" },
+  numRow: { display:"flex", alignItems:"center", gap:6 },
   repBtn: { width:24, height:24, background:"#2a2a20", border:"none", color:"#c8b89a", fontSize:14, cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center" },
   repVal: { fontSize:"1.1rem", fontWeight:700, color:"#c8b89a", minWidth:28, textAlign:"center" },
   toggleBtn: { padding:"5px 10px", background:"#2a2020", border:"1px solid #3a2020", color:"#8a8a8a", fontSize:10, fontWeight:700, letterSpacing:"0.12em", cursor:"pointer", borderRadius:2, minWidth:40 },
