@@ -10,6 +10,7 @@ Personal daily bodyweight PT tracker — no gym, no equipment, no account, no bu
 - Workout log history
 - Export/import your data as a JSON backup (More tab)
 - Fully offline after first load — data lives in the browser (localStorage), nothing leaves your phone
+- Grades tab: shows per-class grades and missing assignments synced from ProgressBook on a schedule, no login required in the app itself (see below)
 
 ## How it's built
 Plain static files — `index.html` + `app.js` — no npm, no bundler. React-like UI is
@@ -31,3 +32,36 @@ then open http://localhost:8787. Re-run `scripts/generate-icons.ps1` if you chan
 
 ## Deploy
 Static files only — GitHub Pages serves this repo directly from `main` / root, no CI needed.
+
+## Grades tab (ProgressBook sync)
+The Grades tab reads `data/grades.json`, which a scheduled GitHub Action
+(`.github/workflows/scrape-progressbook.yml`) keeps up to date by logging into
+ProgressBook with Playwright and writing a summary of grades + missing
+assignments. The app itself never logs in — it only ever displays what the
+scraper last wrote.
+
+**One-time setup:**
+1. In the repo's GitHub settings → **Secrets and variables → Actions**, add:
+   - `PROGRESSBOOK_URL` — the login URL your district's ProgressBook uses (e.g. `https://ca.neonet.org/auth/login?signin=...`)
+   - `PROGRESSBOOK_USERNAME`
+   - `PROGRESSBOOK_PASSWORD`
+
+   These are encrypted at rest and only ever readable by the workflow run —
+   never commit credentials to any file in this repo.
+2. Run the workflow once manually (Actions tab → **Scrape ProgressBook** → **Run workflow**) to confirm login works.
+3. After that it runs automatically on the schedule in the workflow file (default: every 3 hours on school days — edit the `cron` line to change it).
+
+**Status:** login and per-course grade extraction (course name, teacher,
+current-quarter grade) are wired up against the real Grades page. Missing-
+assignment extraction is best-effort and unverified — the school year just
+started, so every course currently has 0 assignments logged, meaning there's
+nothing real to test the "Missing" detection against yet. Once assignments
+start showing up, check the Grades tab and, if `missingAssignments` isn't
+populating correctly, send a screenshot of a course's "see all details" page
+so the selectors in `extractMissingAssignments()` can be fixed against real
+markup.
+
+**Security note:** if a ProgressBook password is ever pasted into a chat,
+screen share, or any non-secret location, treat it as compromised and change
+it — don't reuse a password that's been exposed that way as the one stored
+in GitHub Secrets.
