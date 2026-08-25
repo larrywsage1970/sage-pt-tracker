@@ -51,15 +51,13 @@ scraper last wrote.
 2. Run the workflow once manually (Actions tab → **Scrape ProgressBook** → **Run workflow**) to confirm login works.
 3. After that it runs automatically on the schedule in the workflow file (default: every 3 hours on school days — edit the `cron` line to change it).
 
-**Status:** login and per-course grade extraction (course name, teacher,
-current-quarter grade) are wired up against the real Grades page. Missing-
-assignment extraction is best-effort and unverified — the school year just
-started, so every course currently has 0 assignments logged, meaning there's
-nothing real to test the "Missing" detection against yet. Once assignments
-start showing up, check the Grades tab and, if `missingAssignments` isn't
-populating correctly, send a screenshot of a course's "see all details" page
-so the selectors in `extractMissingAssignments()` can be fixed against real
-markup.
+**Status:** login and per-course grade extraction (course name, current
+grade) are wired up against the real Grades page. Teacher and missing-
+assignment detail aren't extracted yet — that requires clicking into each
+course's expanded row/detail page, which proved unreliable, plus there's no
+real missing-assignment data yet this early in the school year to verify
+that logic against anyway. Worth revisiting once assignments start showing
+up.
 
 **Security note:** if a ProgressBook password is ever pasted into a chat,
 screen share, or any non-secret location, treat it as compromised and change
