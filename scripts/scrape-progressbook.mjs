@@ -84,9 +84,14 @@ async function extractGrades(page) {
     const fullName = (await link.textContent()).trim();
     const name = fullName.split(" - Section:")[0].trim();
 
+    // Find the cell containing the course name and take the next one as the
+    // grade, rather than a hardcoded column index — the row has a leading
+    // expand/collapse cell before Course | Grade | As Of that shifted a
+    // fixed index off by one on the first attempt.
     const row = link.locator("xpath=ancestor::tr[1]");
     const cells = await row.locator("td, th").allTextContents().catch(() => []);
-    const rawGrade = cells[1]?.trim(); // Course | Grade | As Of
+    const nameIdx = cells.findIndex((c) => c.includes(fullName));
+    const rawGrade = nameIdx >= 0 ? cells[nameIdx + 1]?.trim() : null;
     const grade = rawGrade && rawGrade.toLowerCase() !== "n/a" ? rawGrade : null;
 
     courses.push({ name, teacher: null, grade, missingAssignments: [] });
