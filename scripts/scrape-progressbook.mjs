@@ -19,14 +19,15 @@
 // read from the post-login URL rather than hardcoded, so this keeps working
 // if that changes.
 //
-// Grade extraction is verified against a real Grades page (course name,
-// teacher, current-quarter grade). Missing-assignment extraction is
-// best-effort and UNVERIFIED: the district's data for this school year only
-// started a couple days ago, so every course currently shows 0 assignment
-// details — there's nothing real to test the "Missing" parsing against yet.
-// Once assignments start showing up (check the Grades tab or a course's
-// "see all details" page), confirm missingAssignments actually populates
-// and adjust the selectors in extractCourseDetails() if not.
+// Grade extraction reads course name + grade directly from the Grades
+// page's collapsed summary table — verified against the real page.
+// Teacher and missing-assignment detail live behind a per-course "see all
+// details" page and aren't extracted yet: an earlier attempt to click into
+// expanded rows/detail pages proved unreliable (risked following the
+// course's own link and navigating off the Grades page entirely), and
+// there's no real missing-assignment data yet this early in the school
+// year to verify that logic against anyway. Worth revisiting once
+// assignments start showing up.
 
 import { chromium } from "playwright";
 import { writeFile, mkdir } from "node:fs/promises";
@@ -63,59 +64,17 @@ async function login(page) {
   ]);
 }
 
-// Pulls the currently active quarter's key (e.g. "Q1") from the heading like
-// "Q1 (Aug 18 - Oct 16)" shown above the grades table.
-async function currentQuarterKey(page) {
-  const heading = page.getByText(/^Q[1-4] \(.*\)$/).first();
-  const text = await heading.textContent();
-  return text.trim().slice(0, 2);
-}
-
-// Reads the Teacher/Email + per-quarter grade table inside an expanded
-// course row and returns { teacher, grade }.
-async function extractCourseSummary(row, quarterKey) {
-  const teacherText = await row.getByText(/^Teacher:/).first().textContent().catch(() => null);
-  const teacher = teacherText ? teacherText.replace(/^Teacher:\s*/, "").trim() : null;
-
-  const quarterTable = row.locator("table").last();
-  const headerCells = await quarterTable.locator("tr").first().locator("th, td").allTextContents();
-  const valueCells = await quarterTable.locator("tr").nth(1).locator("th, td").allTextContents();
-  const idx = headerCells.findIndex((h) => h.trim().startsWith(quarterKey));
-  const rawGrade = idx >= 0 ? valueCells[idx]?.trim() : null;
-  const grade = rawGrade && rawGrade.toLowerCase() !== "n/a" ? rawGrade : null;
-
-  return { teacher, grade };
-}
-
-// Best-effort: opens a course's "see all details" page and looks for any
-// assignment row flagged "Missing". Unverified against real data — see the
-// file header comment.
-async function extractMissingAssignments(page, detailHref) {
-  const detailPage = await page.context().newPage();
-  try {
-    await detailPage.goto(detailHref, { waitUntil: "networkidle" });
-    const missingRows = detailPage.getByText(/missing/i);
-    const count = await missingRows.count();
-    const results = [];
-    for (let i = 0; i < count; i++) {
-      const row = missingRows.nth(i).locator("xpath=ancestor::tr[1]");
-      const cells = await row.locator("td, th").allTextContents().catch(() => []);
-      const name = cells[0]?.trim();
-      if (name) results.push({ name, dueDate: cells.find((c) => /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(c)) ?? null });
-    }
-    return results;
-  } catch {
-    return [];
-  } finally {
-    await detailPage.close();
-  }
-}
-
+// Reads name + grade directly from each course's collapsed summary row
+// (Course | Grade | As Of columns) — no clicking. Expanding a row risks
+// following the course's own name link instead of a dedicated toggle,
+// which navigates away from the Grades page entirely; reading only the
+// already-rendered collapsed table sidesteps that risk completely.
+// Teacher and missing-assignment detail (which lives behind a per-course
+// "see all details" page) aren't extracted yet — see the file header note.
 async function extractGrades(page) {
   const origin = new URL(page.url()).origin;
   await page.goto(`${origin}/Student/Grades`, { waitUntil: "networkidle" });
 
-  const quarterKey = await currentQuarterKey(page);
   const courseLinks = page.getByRole("link", { name: /- Section:/ });
   const courseCount = await courseLinks.count();
 
@@ -126,22 +85,11 @@ async function extractGrades(page) {
     const name = fullName.split(" - Section:")[0].trim();
 
     const row = link.locator("xpath=ancestor::tr[1]");
-    // Expand the row if it isn't already, so Teacher/Email/quarter grades render.
-    const isExpanded = await row.locator("table").count() > 0;
-    if (!isExpanded) {
-      await row.locator("a, button").first().click().catch(() => {});
-      await page.waitForTimeout(300);
-    }
+    const cells = await row.locator("td, th").allTextContents().catch(() => []);
+    const rawGrade = cells[1]?.trim(); // Course | Grade | As Of
+    const grade = rawGrade && rawGrade.toLowerCase() !== "n/a" ? rawGrade : null;
 
-    const { teacher, grade } = await extractCourseSummary(row, quarterKey).catch(() => ({ teacher: null, grade: null }));
-
-    const detailLink = row.getByRole("link", { name: /see all details/i });
-    const detailHref = await detailLink.getAttribute("href").catch(() => null);
-    const missingAssignments = detailHref
-      ? await extractMissingAssignments(page, new URL(detailHref, origin).toString())
-      : [];
-
-    courses.push({ name, teacher, grade, missingAssignments });
+    courses.push({ name, teacher: null, grade, missingAssignments: [] });
   }
 
   return { updatedAt: new Date().toISOString(), student: null, courses };
