@@ -1,53 +1,53 @@
 {
-  "updatedAt": "2026-08-25T00:01:49.944Z",
+  "updatedAt": "2026-08-25T00:07:18.963Z",
   "student": null,
   "courses": [
     {
       "name": "ALGEBRA 1 ENRICHED",
       "teacher": null,
-      "grade": "ALGEBRA 1 ENRICHED - Section: 5",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "ALGEBRA 1 WIN",
       "teacher": null,
-      "grade": "ALGEBRA 1 WIN - Section: 5",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "AMER SIGN LANGUAGE 1",
       "teacher": null,
-      "grade": "AMER SIGN LANGUAGE 1 - Section: 1",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "ENGLISH 9 ENRICHED",
       "teacher": null,
-      "grade": "ENGLISH 9 ENRICHED - Section: 4",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "LUNCH.",
       "teacher": null,
-      "grade": "LUNCH. - Section: 2",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "PHYSICAL SCIENCE",
       "teacher": null,
-      "grade": "PHYSICAL SCIENCE - Section: 7",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "STUDY HALL",
       "teacher": null,
-      "grade": "STUDY HALL - Section: 2",
+      "grade": null,
       "missingAssignments": []
     },
     {
       "name": "WORLD HISTORY",
       "teacher": null,
-      "grade": "WORLD HISTORY - Section: 3",
+      "grade": null,
       "missingAssignments": []
     }
   ]
